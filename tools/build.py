@@ -717,12 +717,35 @@ def legal_page(slug):
 
 def notfound_page():
     page = {"slug": "404", "title": f"Page not found | {BRAND}", "desc": "This page does not exist.", "sections": []}
+    popular = ["", "minneapolis-web-design-companies", "local-seo-minneapolis", "minneapolis-ppc-management", LG.HUB, "about"]
+    names = {**LONG_NAME, "about": "About Us"}
+    links = "".join(f'<li><a href="{url(s)}">{esc(names[s])}</a></li>' for s in popular)
     svc = "".join(f'<li><a href="{url(s)}">{esc(LONG_NAME[s])}</a></li>' for s in SERVICES)
-    body = f'''<section class="hero hero-plain"><div class="wrap">
-  <h1>This page isn't here</h1>
-  <p class="lead">The link may be old or mistyped. Start from the <a href="/">homepage</a>, pick a service below, or call {PHONE_DISPLAY}.</p>
+    body = f'''<section class="nf">
+  <div class="wrap nf-grid">
+    <div class="nf-copy">
+      <p class="nf-code" aria-hidden="true">404</p>
+      <h1>This page drifted off the map</h1>
+      <p class="lead">The link may be old or mistyped. Everything else is right where you left it, starting from our office in Minneapolis.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/">Back to the homepage</a>
+        <a class="btn btn-ghost-light" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>Call {PHONE_DISPLAY}</span></a>
+      </div>
+      <p class="nf-pop-label">Popular pages</p>
+      <ul class="nf-pop">{links}</ul>
+    </div>
+    <div class="nf-stage">
+      <canvas id="nf-globe" role="img" aria-label="A rotating globe with a flight path from Minneapolis to the place this page wandered off to"></canvas>
+      <p class="nf-hint" aria-hidden="true">Drag to spin the globe</p>
+    </div>
+  </div>
+</section>
+<section class="sec"><div class="wrap">
+  <div class="sec-head wide"><h2>All Services</h2><p class="dek">Pick up where you meant to go.</p></div>
+  <ul class="svc-list">{svc}</ul>
 </div></section>
-<section class="sec"><div class="wrap"><ul class="svc-list">{svc}</ul></div></section>'''
+<script src="/assets/globe/globe-points.js?v={ASSET_V}" defer></script>
+<script src="/assets/globe/globe.js?v={ASSET_V}" defer></script>'''
     return page, body
 
 def about_page():
@@ -809,6 +832,9 @@ def main():
     here = os.path.dirname(os.path.abspath(__file__))
     shutil.copy(os.path.join(here, "site.css"), OUT)
     shutil.copy(os.path.join(here, "site.js"), OUT)
+    os.makedirs(os.path.join(OUT, "assets/globe"), exist_ok=True)
+    shutil.copy(os.path.join(here, "globe.js"), os.path.join(OUT, "assets/globe/globe.js"))
+    shutil.copy(os.path.join(here, "globe-points.js"), os.path.join(OUT, "assets/globe/globe-points.js"))
 
     pages = [extract_page(s) for s in [""] + SERVICES if s not in LG.LEADGEN_SLUGS]
     for p in pages:
