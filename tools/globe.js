@@ -4,6 +4,7 @@
   if (!canvas || !window.GLOBE_LAND) return;
   var ctx = canvas.getContext('2d');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var MODE = canvas.getAttribute('data-mode') || '404';
   var D = Math.PI / 180;
 
   // land dots -> unit vectors
@@ -19,7 +20,8 @@
   var DESTS = [[-33.9, 18.4], [35.7, 139.7], [-41.3, 174.8], [64.1, -21.9], [-22.9, -43.2], [51.5, -0.1], [1.35, 103.8], [-34.6, -58.4], [21.3, -157.9], [60.2, 24.9], [-8.4, 115.2], [30.0, 31.2]];
   var dest = vec.apply(null, DESTS[Math.floor(Math.random() * DESTS.length)]);
 
-  var rot = 93.27 * D - 0.3, tilt = 0.32, vr = reduce ? 0 : 0.0016, vt = 0;
+  var HOME_ROT = 93.27 * D + (MODE === 'thanks' ? 0.12 : -0.3), HOME_TILT = MODE === 'thanks' ? 0.55 : 0.32;
+  var rot = HOME_ROT, tilt = HOME_TILT, vr = reduce ? 0 : 0.0016, vt = 0;
   var W, H, R, cx, cy, dpr;
   function size() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -83,6 +85,7 @@
     hl.addColorStop(0, 'rgba(255,255,255,0.10)'); hl.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = hl; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
 
+    if (MODE === 'thanks') { drawThanks(now); return; }
     // flight arc Minneapolis -> missing page
     var ph = reduce ? 0.62 : ((now - t0) % cycle) / cycle;
     var grow = Math.min(1, ph / 0.55), fade = ph > 0.85 ? 1 - (ph - 0.85) / 0.15 : 1;
@@ -113,8 +116,9 @@
       ctx.font = '700 13px "Bricolage Grotesque", system-ui, sans-serif';
       var label = '404 is here', tw = ctx.measureText(label).width;
       ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      roundRect(P[0] + 10, P[1] - 26, tw + 16, 22, 6); ctx.fill();
-      ctx.fillStyle = '#001A33'; ctx.fillText(label, P[0] + 18, P[1] - 10);
+      var lx0 = P[0] + 10 + tw + 16 > W - 4 ? P[0] - 10 - tw - 16 : P[0] + 10;
+      roundRect(lx0, P[1] - 26, tw + 16, 22, 6); ctx.fill();
+      ctx.fillStyle = '#001A33'; ctx.fillText(label, lx0 + 8, P[1] - 10);
       ctx.globalAlpha = 1;
     }
 
@@ -127,6 +131,66 @@
       ctx.fillStyle = '#FF8900'; ctx.beginPath(); ctx.arc(P[0], P[1], 4.5, 0, 7); ctx.fill();
       ctx.font = '600 12px "Bricolage Grotesque", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillText('Minneapolis', P[0] + 9, P[1] + 16);
+    }
+  }
+  function arc(a, b, grow, alpha, warmToCool) {
+    var steps = 64, last = null;
+    for (var k = 0; k <= steps * grow; k++) {
+      var t = k / steps, v = slerp(a, b, t), h = 1 + 0.26 * Math.sin(Math.PI * t);
+      proj(v[0] * h, v[1] * h, v[2] * h, P);
+      var vis = P[2] > 0 || (P[3] * P[3] + P[4] * P[4]) > 1;
+      if (last && vis && last[2]) {
+        var q = warmToCool ? t : 1 - t; // q=1 is the white end
+        ctx.strokeStyle = 'rgba(255,' + Math.round(137 + 118 * q) + ',' + Math.round(200 * q) + ',' + (0.9 * alpha).toFixed(3) + ')';
+        ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(last[0], last[1]); ctx.lineTo(P[0], P[1]); ctx.stroke();
+      }
+      last = [P[0], P[1], vis];
+    }
+    return last;
+  }
+  function head(pt) {
+    if (!pt || !pt[2]) return;
+    var hg = ctx.createRadialGradient(pt[0], pt[1], 0, pt[0], pt[1], 10);
+    hg.addColorStop(0, 'rgba(255,255,255,0.95)'); hg.addColorStop(1, 'rgba(255,200,120,0)');
+    ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(pt[0], pt[1], 10, 0, 7); ctx.fill();
+  }
+  // thank-you mode: requests fly in from around the world and land in Minneapolis
+  var SOURCES = [[40.7, -74.0], [34.05, -118.25], [29.76, -95.37], [47.6, -122.3], [25.76, -80.19], [41.88, -87.63], [39.74, -104.99], [33.45, -112.07], [43.65, -79.38], [51.5, -0.1], [19.43, -99.13], [32.78, -96.8]];
+  var srcVecs = SOURCES.map(function (c) { return vec(c[0], c[1]); });
+  var TCYCLE = 7000, STAGGER = 520, FLY = 1500, landed = -1e9;
+  function drawThanks(now) {
+    var tt = reduce ? 4000 : now % TCYCLE, lastLand = -1e9;
+    for (var i = 0; i < srcVecs.length; i++) {
+      var st0 = i * STAGGER, e = tt - st0;
+      if (e < 0) continue;
+      var grow = Math.min(1, e / FLY), alpha = e > FLY ? Math.max(0, 1 - (e - FLY) / 1400) : 1;
+      if (reduce) { grow = 1; alpha = 0.7; }
+      if (alpha <= 0) continue;
+      // source dot
+      proj(srcVecs[i][0], srcVecs[i][1], srcVecs[i][2], P);
+      if (P[2] > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (0.8 * alpha).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(P[0], P[1], 2.4, 0, 7); ctx.fill(); }
+      var end = arc(srcVecs[i], MSP, grow, alpha, false);
+      if (grow < 1) head(end); else lastLand = Math.max(lastLand, st0 + FLY);
+    }
+    var since = tt - lastLand;
+    proj(MSP[0], MSP[1], MSP[2], P);
+    if (P[2] > 0) {
+      if (!reduce && since >= 0 && since < 700) { // landing burst
+        var k = since / 700;
+        ctx.strokeStyle = 'rgba(255,200,120,' + (0.9 * (1 - k)).toFixed(3) + ')'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(P[0], P[1], 6 + k * 34, 0, 7); ctx.stroke();
+      }
+      var glow = ctx.createRadialGradient(P[0], P[1], 0, P[0], P[1], 26);
+      glow.addColorStop(0, 'rgba(255,137,0,0.55)'); glow.addColorStop(1, 'rgba(255,137,0,0)');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(P[0], P[1], 26, 0, 7); ctx.fill();
+      ctx.fillStyle = '#FF8900'; ctx.beginPath(); ctx.arc(P[0], P[1], 5.5, 0, 7); ctx.fill();
+      ctx.font = '700 13px "Bricolage Grotesque", system-ui, sans-serif';
+      var label = 'Request received', tw = ctx.measureText(label).width;
+      var bw = tw + 34, bx = P[0] + 12 + bw > W - 4 ? P[0] - 12 - bw : P[0] + 12;
+      ctx.fillStyle = 'rgba(255,255,255,0.96)'; roundRect(bx, P[1] - 30, bw, 24, 7); ctx.fill();
+      ctx.fillStyle = '#1E9E4F'; ctx.beginPath(); ctx.arc(bx + 12, P[1] - 18, 4.5, 0, 7); ctx.fill();
+      ctx.fillStyle = '#001A33'; ctx.fillText(label, bx + 22, P[1] - 13);
     }
   }
   function roundRect(x, y, w, h, r) {
@@ -151,7 +215,11 @@
   function loop(now) {
     if (!dragging) {
       rot += vr; tilt = Math.max(-0.9, Math.min(0.9, tilt + vt));
-      vr += (0.0016 - vr) * 0.02; vt *= 0.94;
+      if (MODE === 'thanks') { // keep Minneapolis in view: gentle sway, ease back home after a drag
+        vr *= 0.94; vt *= 0.94;
+        rot += (HOME_ROT + 0.22 * Math.sin(now / 3800) - rot) * 0.015;
+        tilt += (HOME_TILT - tilt) * 0.015;
+      } else { vr += (0.0016 - vr) * 0.02; vt *= 0.94; }
     }
     if (now - cycleStart > cycle) { // new destination each flight
       cycleStart = now; t0 = now;

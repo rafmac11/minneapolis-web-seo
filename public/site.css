@@ -245,6 +245,17 @@ p{margin:0 0 1.1em}
 @keyframes globe-in{from{opacity:0;transform:scale(.9) rotate(-8deg)}to{opacity:1;transform:none}}
 @media (max-width:1020px){.nf-grid{grid-template-columns:1fr;min-height:0}.nf-stage{max-width:460px;order:-1;margin-bottom:-1rem}.nf-code{font-size:clamp(4rem,18vw,6rem)}}
 
+/* ---------- thank you */
+.ty-badge{display:inline-flex;align-items:center;gap:.6rem;font:650 .95rem/1 var(--display);color:#D9F5E4;background:rgba(30,158,79,.18);border:1px solid rgba(30,158,79,.55);padding:.55rem .9rem .55rem .6rem;border-radius:999px;margin:0 0 1.6rem}
+.ty-check{width:1.35rem;height:1.35rem;border-radius:50%;background:#1E9E4F url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.4l2.6 2.5L12 5.4' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' stroke-dasharray='14' stroke-dashoffset='14'%3E%3Canimate attributeName='stroke-dashoffset' from='14' to='0' dur='.5s' begin='.4s' fill='freeze'/%3E%3C/path%3E%3C/svg%3E") center/80% no-repeat;animation:pop .45s cubic-bezier(.3,1.6,.5,1) .15s both}
+.ty h1{font-size:clamp(2.4rem,4.8vw,4rem)}
+.ty-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.5rem}
+.ty-steps li{border-top:2px solid var(--navy);padding-top:1.25rem}
+.ty-n{display:inline-grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--orange);color:var(--night);font:780 1.1rem/1 var(--display);margin-bottom:1rem}
+.ty-steps h3{margin-bottom:.5rem}
+.ty-steps p{margin:0;font-size:1.02rem;color:#2E3D4C}
+@media (max-width:1020px){.ty-steps{grid-template-columns:1fr;gap:1.75rem}}
+
 /* ---------- footer */
 .site-footer{background:var(--night);color:#A9C0D3;border-top:1px solid rgba(255,255,255,.08)}
 .footer-top{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:clamp(2rem,6vw,5rem);padding-top:var(--s5);padding-bottom:var(--s5)}

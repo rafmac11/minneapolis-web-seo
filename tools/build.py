@@ -803,6 +803,52 @@ def about_page():
             "desc": "A Minnesota team that learned SEO growing its own business 12 years ago. Today our web designers and SaaS developers help businesses nationwide grow.",
             "sections": sections}
 
+def thankyou_page():
+    page = {"slug": "thank-you", "crumb": "Thank you", "title": f"Thank You | {BRAND}",
+            "desc": "Thanks for contacting Website Design & SEO Solutions. Your request has reached our Minneapolis team.", "sections": []}
+    explore = [("about", "About Us", "How we went from growing our own business to helping others grow theirs."),
+               (LG.HUB, "Contractor Lead Generation", LG.PAGES[0]["blurb"]),
+               ("local-seo-minneapolis", "Local SEO", SERVICE_BLURB.get("local-seo-minneapolis", "")),
+               ("minneapolis-web-design-companies", "Website Design", SERVICE_BLURB.get("minneapolis-web-design-companies", ""))]
+    rel = "".join(f'<li><a href="{url(s_)}"><span class="rel-name">{esc(n)}</span><span class="rel-desc">{esc(d)}</span></a></li>' for s_, n, d in explore)
+    body = f'''<section class="nf ty">
+  <div class="wrap nf-grid">
+    <div class="nf-copy">
+      <p class="ty-badge"><span class="ty-check" aria-hidden="true"></span>Request received</p>
+      <h1>Thank you. Your request is on its way to our team.</h1>
+      <p class="lead">We have your details. Someone from our Minneapolis office will call or email you back during business hours: <strong>Monday to Friday 8am–6pm</strong> and <strong>Saturday 9am–2pm</strong>.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/">Back to the homepage</a>
+        <a class="btn btn-ghost-light" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>Need us sooner? {PHONE_DISPLAY}</span></a>
+      </div>
+    </div>
+    <div class="nf-stage">
+      <canvas id="nf-globe" data-mode="thanks" role="img" aria-label="A globe with requests from cities around the world arriving at our Minneapolis office">Requests arriving at our Minneapolis office.</canvas>
+      <p class="nf-hint" aria-hidden="true">Drag to spin the globe</p>
+    </div>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head wide"><h2>What Happens Next</h2><p class="dek">Three short steps, no pressure.</p></div>
+    <ol class="ty-steps">
+      <li><span class="ty-n">1</span><h3>We review your request</h3><p>We look at your website, your services and the area you serve before we reach out, so the first conversation is useful.</p></li>
+      <li><span class="ty-n">2</span><h3>A short call</h3><p>We ask what is working, what is not and which jobs or customers you want more of. Bring any reports or numbers you already have.</p></li>
+      <li><span class="ty-n">3</span><h3>A clear plan and price</h3><p>You get an honest recommendation of what to do first, what it costs and how you will see whether it worked.</p></li>
+    </ol>
+  </div>
+</section>
+<section class="sec alt">
+  <div class="wrap">
+    <div class="sec-head wide"><h2>While You Wait</h2><p class="dek">A few pages worth a look before we talk.</p></div>
+    <ul class="rel">{rel}</ul>
+  </div>
+</section>
+<script>window.dataLayer=window.dataLayer||[];window.dataLayer.push({{event:"thank_you_page_view"}});</script>
+<script src="/assets/globe/globe-points.js?v={GLOBE_V}" defer></script>
+<script src="/assets/globe/globe.js?v={GLOBE_V}" defer></script>'''
+    return page, body
+
 # ---------------------------------------------------------------- main
 LONG_NAME = {"": "Search Engine Optimization (SEO)",
              "minneapolis-web-design-companies": "Website Design",
@@ -899,6 +945,10 @@ def main():
         kind = "ContactPage" if p["slug"] == "contact" else "WebPage"
         d = os.path.join(OUT, p["slug"]); os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(document(p, body, page_ld(p, kind)))
+    p, body = thankyou_page()
+    os.makedirs(os.path.join(OUT, "thank-you"), exist_ok=True)
+    open(os.path.join(OUT, "thank-you", "index.html"), "w", encoding="utf-8").write(
+        document(p, body, json.dumps({"@context": "https://schema.org", "@type": "WebPage", "name": p["title"], "url": absu("thank-you")}), robots="noindex, follow"))
     p, body = notfound_page()
     open(os.path.join(OUT, "404.html"), "w", encoding="utf-8").write(
         document(p, body, json.dumps({"@context": "https://schema.org", "@type": "WebPage", "name": p["title"]}), robots="noindex, follow"))
