@@ -620,6 +620,7 @@ def document(page, body, ld, og_img=None, robots="index, follow, max-image-previ
 <title>{esc(page["title"])}</title>
 <meta name="description" content="{esc(page["desc"])}">
 <meta name="robots" content="{robots}">
+<meta name="google-site-verification" content="V68KdejA4_YvFmyL5CZc01YLUrvWZTie88NH_oMRZtE">
 <link rel="canonical" href="{u}">
 <meta name="theme-color" content="#002B53">
 <meta name="format-detection" content="telephone=no">
