@@ -21,6 +21,8 @@ ASSET_V = TODAY.replace("-", "")
 import importlib.util as _ilu
 _spec = _ilu.spec_from_file_location("leadgen_content", os.path.join(os.path.dirname(os.path.abspath(__file__)), "leadgen_content.py"))
 LG = _ilu.module_from_spec(_spec); _spec.loader.exec_module(LG)
+_spec2 = _ilu.spec_from_file_location("entities", os.path.join(os.path.dirname(os.path.abspath(__file__)), "entities.py"))
+ENT = _ilu.module_from_spec(_spec2); _spec2.loader.exec_module(ENT)
 
 # ---------------------------------------------------------------- site map
 NAV = [
@@ -537,7 +539,7 @@ def render_sections(page):
     return "\n".join(out)
 
 # ---------------------------------------------------------------- schema
-def business_ld():
+def business_ld(slug=""):
     return {
         "@type": ["ProfessionalService", "LocalBusiness"], "@id": ORIGIN + "/#business",
         "name": BRAND, "url": ORIGIN + "/", "email": EMAIL, "telephone": PHONE_LD,
@@ -553,20 +555,21 @@ def business_ld():
         "areaServed": [{"@type": "City", "name": "Minneapolis", "sameAs": "https://en.wikipedia.org/wiki/Minneapolis"},
                        {"@type": "AdministrativeArea", "name": "Minneapolis–Saint Paul metropolitan area"},
                        {"@type": "Country", "name": "United States"}],
-        "knowsAbout": ["Search engine optimization", "Local SEO", "Website design", "Web development", "WordPress",
-                       "Pay-per-click advertising", "Social media marketing", "Branding", "Graphic design"],
+        "knowsAbout": [ENT.thing(k) for k in ENT.topics_for(slug)],
         "contactPoint": {"@type": "ContactPoint", "telephone": PHONE_LD, "email": EMAIL, "contactType": "sales",
                          "areaServed": "US", "availableLanguage": "English"},
     }
 
 def page_ld(page, kind="WebPage"):
     u = absu(page["slug"])
-    graph = [business_ld(),
+    graph = [business_ld(page["slug"]),
              {"@type": "WebSite", "@id": ORIGIN + "/#website", "url": ORIGIN + "/", "name": BRAND,
               "inLanguage": "en-US", "publisher": {"@id": ORIGIN + "/#business"}}]
     wp = {"@type": kind, "@id": u + "#webpage", "url": u, "name": page["title"], "description": page["desc"],
           "inLanguage": "en-US", "isPartOf": {"@id": ORIGIN + "/#website"}, "dateModified": TODAY,
-          "about": {"@id": ORIGIN + "/#business"}}
+          "about": ENT.thing(ENT.topics_for(page["slug"])[0]),
+          "mentions": [ENT.thing(k) for k in ENT.topics_for(page["slug"])[1:]],
+          "publisher": {"@id": ORIGIN + "/#business"}}
     hero = next((s for s in page.get("sections", []) if s["type"] == "hero" and s.get("img")), None)
     if hero:
         wp["primaryImageOfPage"] = {"@type": "ImageObject", "url": ORIGIN + hero["img"]["src"],
