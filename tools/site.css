@@ -44,7 +44,7 @@ p{margin:0 0 1.1em}
 .utility .wrap{display:flex;justify-content:space-between;gap:1rem;padding-top:.6rem;padding-bottom:.6rem}
 .utility p{margin:0}
 .site-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.97);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--rule)}
-.site-header .wrap{display:flex;align-items:center;gap:1rem;min-height:76px}
+.site-header .wrap{display:flex;align-items:center;gap:.75rem;min-height:76px}
 .logo{flex:none}
 .logo img{width:clamp(200px,20vw,250px)}
 .nav{margin-left:auto}

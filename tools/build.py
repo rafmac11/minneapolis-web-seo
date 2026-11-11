@@ -50,7 +50,7 @@ NAV = [
                    ("minneapolis-ppc-management", "PPC Management"),
                    ("social-media-marketing-minneapolis", "Social Media Marketing")]),
     ("Lead Generation", [(p["slug"], p["nav"]) for p in LG.PAGES]),
-    ("Brand & Creative", [("advertising-companies-minneapolis", "Advertising"),
+    ("Creative", [("advertising-companies-minneapolis", "Advertising"),
                           ("creative-agencies-minneapolis", "Creative Agency"),
                           ("branding-agency-minneapolis", "Branding")]),
 ]
@@ -396,7 +396,7 @@ def header(slug):
 <header class="site-header"><div class="wrap">
   <a class="logo" href="/" aria-label="{BRAND} home"><img src="/assets/1094/logo-display.webp" width="560" height="84" alt="{BRAND}"></a>
   <nav class="nav" id="primary-nav-panel" aria-label="Primary">
-    <ul class="nav-list">{"".join(groups)}<li><a class="nav-link" href="/about/"{" aria-current=\"page\"" if slug == "about" else ""}>About</a></li><li class="nav-mobile"><a class="nav-link" href="/contact/"{" aria-current=\"page\"" if slug == "contact" else ""}>Contact</a></li></ul>
+    <ul class="nav-list">{"".join(groups)}<li><a class="nav-link" href="/about/"{" aria-current=\"page\"" if slug == "about" else ""}>About</a></li><li><a class="nav-link" href="/contact/"{" aria-current=\"page\"" if slug == "contact" else ""}>Contact</a></li></ul>
   </nav>
   <a class="btn btn-call" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>{PHONE_DISPLAY}</span></a>
   <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav-panel"><span></span><span class="sr">Menu</span></button>
