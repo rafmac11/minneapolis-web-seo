@@ -391,7 +391,7 @@ def header(slug):
     return f'''<a class="skip" href="#main">Skip to content</a>
 <div class="utility"><div class="wrap">
   <p>Based in Minneapolis, serving clients nationwide</p>
-  <p>Mon–Fri 8am–6pm, Sat 9am–2pm</p>
+  <p>Mon–Fri 8am–6pm, closed weekends</p>
 </div></div>
 <header class="site-header"><div class="wrap">
   <a class="logo" href="/" aria-label="{BRAND} home"><img src="/assets/1094/logo-display.webp" width="560" height="84" alt="{BRAND}"></a>
@@ -559,8 +559,7 @@ def business_ld(slug=""):
         "address": {"@type": "PostalAddress", "streetAddress": STREET, "addressLocality": CITY,
                     "addressRegion": REGION, "postalCode": ZIP, "addressCountry": "US"},
         "openingHoursSpecification": [
-            {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "08:00", "closes": "18:00"},
-            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "14:00"}],
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "08:00", "closes": "18:00"}],
         "areaServed": [{"@type": "City", "name": "Minneapolis", "sameAs": "https://en.wikipedia.org/wiki/Minneapolis"},
                        {"@type": "AdministrativeArea", "name": "Minneapolis–Saint Paul metropolitan area"},
                        {"@type": "Country", "name": "United States"}],
@@ -688,7 +687,7 @@ def contact_page():
         <li><a href="mailto:{EMAIL}"><span class="ct-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5zm2 .9v.3l7 4.6 7-4.6v-.3zm14 2.6-6.45 4.24a1 1 0 0 1-1.1 0L5 10v7h14z" fill="currentColor"/></svg></span><span><span class="ct-l">Email</span><span class="ct-v">{EMAIL}</span></span></a></li>
         <li><a href="https://www.google.com/maps/search/?api=1&amp;query=530+N+3rd+St+Minneapolis+MN+55401" target="_blank" rel="noopener"><span class="ct-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 5.2-7 13-7 13S5 14.2 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z" fill="currentColor"/></svg></span><span><span class="ct-l">Visit</span><span class="ct-v">{STREET}, {CITY}, {REGION} {ZIP}</span></span></a></li>
       </ul>
-      <dl class="ct-hours"><div><dt>Monday–Friday</dt><dd>8am–6pm</dd></div><div><dt>Saturday</dt><dd>9am–2pm</dd></div><div><dt>Sunday</dt><dd>Closed</dd></div></dl>
+      <dl class="ct-hours"><div><dt>Monday–Friday</dt><dd>8am–6pm</dd></div><div><dt>Saturday–Sunday</dt><dd>Closed</dd></div></dl>
     </div>
     <div class="ct-card" id="form">
       <h2>Request a free callback</h2>
@@ -837,7 +836,7 @@ def thankyou_page():
     <div class="nf-copy">
       <p class="ty-badge"><span class="ty-check" aria-hidden="true"></span>Request received</p>
       <h1>Thank you. Your request is on its way to our team.</h1>
-      <p class="lead">We have your details. Someone from our Minneapolis office will call or email you back during business hours: <strong>Monday to Friday 8am–6pm</strong> and <strong>Saturday 9am–2pm</strong>.</p>
+      <p class="lead">We have your details. Someone from our Minneapolis office will call or email you back during business hours, <strong>Monday to Friday 8am–6pm</strong>. Requests sent on the weekend are answered the next business day.</p>
       <div class="actions">
         <a class="btn btn-primary" href="/">Back to the homepage</a>
         <a class="btn btn-ghost-light" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>Need us sooner? {PHONE_DISPLAY}</span></a>
