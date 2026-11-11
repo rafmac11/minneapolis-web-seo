@@ -642,6 +642,7 @@ def document(page, body, ld, og_img=None, robots="index, follow, max-image-previ
 <link rel="preload" href="/fonts/source-serif-4-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
 {preload}
 <link rel="stylesheet" href="/site.css?v={ASSET_V}">
+<script>(function(d){{try{{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){{d.classList.add('js-anim');setTimeout(function(){{if(!window.__revealReady)d.classList.remove('js-anim')}},2500)}}}}catch(e){{}}}})(document.documentElement)</script>
 <script type="application/ld+json">{ld}</script>
 </head>
 <body>
