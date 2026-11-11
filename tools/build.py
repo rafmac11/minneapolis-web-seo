@@ -16,7 +16,16 @@ EMAIL = "info@seo4web.pro"
 STREET, CITY, REGION, ZIP = "530 N 3rd St", "Minneapolis", "MN", "55401"
 TODAY = datetime.date.today().isoformat()
 FONTS = "/home/claude/tools/node_modules/@fontsource-variable"
-ASSET_V = TODAY.replace("-", "")
+import hashlib
+def _hash(*names):
+    h = hashlib.sha1()
+    for n in names:
+        h.update(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), n), "rb").read())
+    return h.hexdigest()[:10]
+# content-based cache busting: any change to a file gives it a new URL
+CSS_V = _hash("site.css")
+JS_V = _hash("site.js")
+GLOBE_V = _hash("globe.js", "globe-points.js")
 
 import importlib.util as _ilu
 _spec = _ilu.spec_from_file_location("leadgen_content", os.path.join(os.path.dirname(os.path.abspath(__file__)), "leadgen_content.py"))
@@ -645,7 +654,7 @@ def document(page, body, ld, og_img=None, robots="index, follow, max-image-previ
 <link rel="preload" href="/fonts/bricolage-grotesque-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/source-serif-4-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
 {preload}
-<link rel="stylesheet" href="/site.css?v={ASSET_V}">
+<link rel="stylesheet" href="/site.css?v={CSS_V}">
 <script>(function(d){{try{{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){{d.classList.add('js-anim');setTimeout(function(){{if(!window.__revealReady)d.classList.remove('js-anim')}},2500)}}}}catch(e){{}}}})(document.documentElement)</script>
 <script type="application/ld+json">{ld}</script>
 </head>
@@ -655,7 +664,7 @@ def document(page, body, ld, og_img=None, robots="index, follow, max-image-previ
 {body}
 </main>
 {footer()}
-<script src="/site.js?v={ASSET_V}" defer></script>
+<script src="/site.js?v={JS_V}" defer></script>
 </body>
 </html>
 '''
@@ -735,7 +744,7 @@ def notfound_page():
       <ul class="nf-pop">{links}</ul>
     </div>
     <div class="nf-stage">
-      <canvas id="nf-globe" role="img" aria-label="A rotating globe with a flight path from Minneapolis to the place this page wandered off to"></canvas>
+      <canvas id="nf-globe" role="img" aria-label="A rotating globe with a flight path from Minneapolis to the place this page wandered off to">A globe showing a flight path from Minneapolis.</canvas>
       <p class="nf-hint" aria-hidden="true">Drag to spin the globe</p>
     </div>
   </div>
@@ -744,8 +753,8 @@ def notfound_page():
   <div class="sec-head wide"><h2>All Services</h2><p class="dek">Pick up where you meant to go.</p></div>
   <ul class="svc-list">{svc}</ul>
 </div></section>
-<script src="/assets/globe/globe-points.js?v={ASSET_V}" defer></script>
-<script src="/assets/globe/globe.js?v={ASSET_V}" defer></script>'''
+<script src="/assets/globe/globe-points.js?v={GLOBE_V}" defer></script>
+<script src="/assets/globe/globe.js?v={GLOBE_V}" defer></script>'''
     return page, body
 
 def about_page():
