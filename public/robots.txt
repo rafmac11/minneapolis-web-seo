@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://seo4web.pro/sitemap.xml
+
+# Plain-text guide for AI assistants: https://seo4web.pro/llms.txt

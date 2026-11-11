@@ -1,0 +1,787 @@
+#!/usr/bin/env python3
+"""Rebuild the seo4web.pro static site from the exported content with a new design,
+fixed SEO metadata/schema and contextual interlinking.
+Usage: python3 -I build.py <src_dir> <out_dir>
+"""
+import sys, os, re, json, shutil, html, datetime, copy
+from bs4 import BeautifulSoup, NavigableString, Tag
+
+SRC, OUT = sys.argv[1], sys.argv[2]
+ORIGIN = "https://seo4web.pro"
+BRAND = "Website Design & SEO Solutions"
+PHONE_DISPLAY = "(612) 230-0815"
+PHONE_TEL = "+16122300815"
+PHONE_LD = "+1-612-230-0815"
+EMAIL = "info@seo4web.pro"
+STREET, CITY, REGION, ZIP = "530 N 3rd St", "Minneapolis", "MN", "55401"
+TODAY = datetime.date.today().isoformat()
+FONTS = os.environ.get("FONTS_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "node_modules/@fontsource-variable"))
+ASSET_V = TODAY.replace("-", "")
+
+# ---------------------------------------------------------------- site map
+NAV = [
+    ("Web Design", [("minneapolis-web-design-companies", "Web Design"),
+                    ("web-developers-minneapolis", "Web Development"),
+                    ("wordpress-design-minneapolis", "WordPress Design"),
+                    ("design-agency-minneapolis", "Design Agency"),
+                    ("graphic-design-firm-minneapolis", "Graphic Design")]),
+    ("SEO", [("", "SEO Services"),
+             ("minneapolis-seo-consultant", "SEO Consulting"),
+             ("local-seo-minneapolis", "Local SEO")]),
+    ("Marketing", [("digital-marketing-minneapolis-mn", "Digital Marketing"),
+                   ("marketing-minneapolis", "Marketing Services"),
+                   ("online-marketing-minneapolis", "Online Marketing"),
+                   ("minneapolis-marketing-firms", "Marketing Firm"),
+                   ("minneapolis-ppc-management", "PPC Management"),
+                   ("social-media-marketing-minneapolis", "Social Media Marketing")]),
+    ("Brand & Creative", [("advertising-companies-minneapolis", "Advertising"),
+                          ("creative-agencies-minneapolis", "Creative Agency"),
+                          ("branding-agency-minneapolis", "Branding")]),
+]
+CLUSTER = {}
+SHORT = {}
+for group, items in NAV:
+    for slug, label in items:
+        CLUSTER[slug] = group
+        SHORT[slug] = label
+SERVICES = [s for g, items in NAV for s, _ in items if s]
+
+# Contextual anchor phrases -> target page. Longer / more specific phrases first.
+LINK_PHRASES = [  # (regex, target) — earlier entries win ties
+    (r"local SEO|Google Business Profile|local search(?: results)?|map results", "local-seo-minneapolis"),
+    (r"SEO consultants?|SEO consulting|SEO audits?|technical SEO|keyword research", "minneapolis-seo-consultant"),
+    (r"search engine optimization|organic search(?: visibility)?|organic visibility", ""),
+    (r"pay-per-click|paid search|Google Ads|PPC(?: campaigns?| management)?|paid (?:advertising|campaigns?|media)", "minneapolis-ppc-management"),
+    (r"social media(?: marketing)?", "social-media-marketing-minneapolis"),
+    (r"digital marketing|digital (?:channels|campaigns?)|conversion tracking", "digital-marketing-minneapolis-mn"),
+    (r"online marketing|online (?:presence|visibility|channels|campaigns?|advertising|audiences?|customers|search|reputation|growth|leads|marketplace|sales|research)|business online", "online-marketing-minneapolis"),
+    (r"marketing (?:firms?|compan(?:y|ies)|agency|agencies|partners?|teams?)|agency relationship|full-service", "minneapolis-marketing-firms"),
+    (r"marketing (?:strategy|strategies|plans?|services|programs?|campaigns?|priorities|support|planning|program|tasks)", "marketing-minneapolis"),
+    (r"WordPress", "wordpress-design-minneapolis"),
+    (r"web(?:site)? development|web developers?|content management systems?|responsive (?:design|layouts?|websites?)|(?:web|website|WordPress|front-end) developers?", "web-developers-minneapolis"),
+    (r"website design|web design|website redesigns?|website designers?|landing pages?|page structure|site structure|site navigation", "minneapolis-web-design-companies"),
+    (r"design agenc(?:y|ies)|visual design|user experience|redesigns?", "design-agency-minneapolis"),
+    (r"graphic design(?:ers?)?|logo design|visual assets|marketing materials|marketing collateral|visual systems?", "graphic-design-firm-minneapolis"),
+    (r"creative (?:agenc(?:y|ies)|direction|work|teams?|concepts?|production|campaigns?|strategy|assets)", "creative-agencies-minneapolis"),
+    (r"brand strategy|brand identity|branding|visual identity|brand (?:positioning|voice|standards|guidelines|messaging|consistency|recognition)", "branding-agency-minneapolis"),
+    (r"advertising(?: campaigns?)?", "advertising-companies-minneapolis"),
+]
+MAX_CONTEXT_LINKS = 6
+MAX_INBOUND = 6
+
+# ---------------------------------------------------------------- helpers
+def url(slug):
+    return "/" if not slug else f"/{slug}/"
+
+def absu(slug):
+    return ORIGIN + url(slug)
+
+def fix_brand(s):
+    return re.sub(r"website design &(amp;)? SEO Solutions", lambda m: "Website Design &" + (m.group(1) or "") + " SEO Solutions", s)
+
+def norm_href(h):
+    if h.startswith(("tel:", "mailto:", "http", "#")):
+        return h
+    h = re.sub(r"^(\.\./)+", "", h)
+    if h in ("index.html", ""):
+        return "/"
+    m = re.match(r"([\w-]+)/index\.html$", h)
+    return f"/{m.group(1)}/" if m else "/" + h
+
+def norm_src(s):
+    return "/" + re.sub(r"^(\.\./)+", "", s)
+
+def esc(s):
+    return html.escape(s, quote=True)
+
+def text(el):
+    return re.sub(r"\s+", " ", el.get_text(" ", strip=True)).strip() if el else ""
+
+ALLOWED = {"a", "strong", "em", "b", "i", "br", "code"}
+def inner(el):
+    """Clean inner HTML of a paragraph-like element."""
+    el = copy.copy(el)
+    for t in el.find_all(True):
+        if t.name not in ALLOWED:
+            t.unwrap(); continue
+        attrs = {}
+        if t.name == "a" and t.get("href"):
+            attrs["href"] = norm_href(t["href"])
+        t.attrs = attrs
+    out = "".join(str(c) for c in el.contents)
+    out = re.sub(r"\s+", " ", out).strip()
+    # tidy up lowercase "seo" in legacy anchor text
+    out = re.sub(r"\bseo\b", "SEO", out)
+    out = out.replace("a SEO", "an SEO").replace("Minneapolis homeowners rely on", "Minneapolis businesses rely on")
+    return fix_brand(out)
+
+def img_data(img):
+    d = {"src": norm_src(img["src"]), "alt": fix_brand(img.get("alt", "")),
+         "w": img.get("width"), "h": img.get("height"), "srcset": ""}
+    if "field-presence" in d["src"]:  # shared photo: original alt texts described other scenes
+        d["alt"] = "Website Design & SEO Solutions branded service van at a client's home in a Minneapolis neighborhood"
+    if img.get("srcset"):
+        parts = []
+        for p in img["srcset"].split(","):
+            u, wd = p.strip().rsplit(" ", 1)
+            parts.append(f"{norm_src(u)} {wd}")
+        d["srcset"] = ", ".join(parts)
+    return d
+
+def render_img(d, sizes, eager=False, cls=""):
+    a = [f'src="{esc(d["src"])}"', f'alt="{esc(d["alt"])}"']
+    if d["srcset"]:
+        a.append(f'srcset="{esc(d["srcset"])}" sizes="{sizes}"')
+    if d["w"]:
+        a.append(f'width="{d["w"]}" height="{d["h"]}"')
+    a.append('fetchpriority="high" decoding="async"' if eager else 'loading="lazy" decoding="async"')
+    if cls:
+        a.append(f'class="{cls}"')
+    return "<img " + " ".join(a) + ">"
+
+# ---------------------------------------------------------------- extraction
+def kicker_for(h2):
+    sp = h2.find_previous_sibling("span")
+    return text(sp) if sp else ""
+
+def intro_for(h2):
+    p = h2.find_next_sibling("p")
+    return inner(p) if p else ""
+
+def paras_in(sec, exclude=()):
+    out = []
+    for p in sec.find_all("p"):
+        if any(p.find_parent(x) for x in ("article", "details", "figure")):
+            continue
+        if p in exclude:
+            continue
+        out.append(p)
+    return out
+
+def extract_section(sec, is_last):
+    h1, h2 = sec.find("h1"), sec.find("h2")
+    imgs = sec.find_all("img")
+    if h1:
+        tc = h1.parent
+        kick = h1.find_previous_sibling()
+        ps = [p for p in tc.find_all("p") if not p.find_parent("figure")]
+        lead = max(ps, key=lambda p: len(text(p))) if ps else None
+        chips_el = tc.find(attrs={"aria-label": True}, recursive=True)
+        chips = [text(s) for s in chips_el.find_all("span")] if chips_el and chips_el.name == "div" else []
+        return {"type": "hero", "kicker": text(kick) if kick and kick.name == "div" else "",
+                "h1": fix_brand(text(h1)), "lead": inner(lead) if lead else "", "chips": chips,
+                "img": img_data(imgs[0]) if imgs else None}
+    if not h2:
+        a = sec.find("a")
+        return {"type": "band", "text": inner(sec.find("p")), "href": norm_href(a["href"]) if a else "",
+                "cta": text(a) if a else ""}
+    base = {"kicker": kicker_for(h2), "h2": fix_brand(text(h2)), "intro": intro_for(h2)}
+    if sec.find("details"):
+        items = []
+        for d in sec.find_all("details"):
+            items.append({"q": text(d.summary), "a": inner(d.find("p"))})
+        return {**base, "type": "faq", "items": items}
+    steps = [s for s in sec.find_all("span") if re.fullmatch(r"\s*0\d\s*", s.get_text())]
+    if steps:
+        items = []
+        for s in steps:
+            box = s.parent
+            items.append({"n": text(s), "h": text(box.find("h3")), "p": inner(box.find("p"))})
+        return {**base, "type": "steps", "items": items}
+    if sec.find("article"):
+        items = []
+        for ar in sec.find_all("article"):
+            a = ar.find("a")
+            items.append({"h": text(ar.find("h3")), "p": inner(ar.find("p")),
+                          "href": norm_href(a["href"]) if a else ""})
+        return {**base, "type": "cards", "items": items}
+    if sec.find("h3"):
+        items = [{"h": text(h3), "p": inner(h3.find_next_sibling("p")), "href": ""} for h3 in sec.find_all("h3")]
+        return {**base, "type": "areas", "items": items}
+    if len(imgs) >= 2:
+        return {**base, "type": "gallery", "imgs": [img_data(i) for i in imgs]}
+    intro_p = h2.find_next_sibling("p")
+    ps = [inner(p) for p in paras_in(sec, exclude=[intro_p] if intro_p else []) if text(p)]
+    if is_last:
+        return {**base, "type": "final", "paras": ps}
+    if imgs:
+        return {**base, "type": "media", "paras": ps, "img": img_data(imgs[0])}
+    return {**base, "type": "prose", "paras": ps}
+
+def extract_page(slug):
+    path = os.path.join(SRC, slug, "index.html") if slug else os.path.join(SRC, "index.html")
+    s = BeautifulSoup(open(path, encoding="utf-8").read(), "lxml")
+    page = {"slug": slug, "title": fix_brand(s.title.string.strip()),
+            "desc": fix_brand(s.find("meta", attrs={"name": "description"})["content"].strip())}
+    secs = s.main.find_all("section", recursive=False)
+    page["sections"] = [extract_section(x, i == len(secs) - 1) for i, x in enumerate(secs)]
+    page["main_soup"] = s.main
+    return page
+
+# ---------------------------------------------------------------- interlinking
+def _slots(page):
+    """Yield (container, key) slots whose HTML may receive one contextual link."""
+    for sec in page["sections"]:
+        if sec["type"] in ("prose", "media"):
+            for i in range(len(sec["paras"])):
+                yield (sec["paras"], i)
+        elif sec["type"] in ("faq",):
+            for it in sec["items"]:
+                yield (it, "a")
+        elif sec["type"] in ("cards", "areas"):
+            for it in sec["items"]:
+                if not it["href"]:
+                    yield (it, "p")
+
+def _candidates(page, used, slot_html):
+    frag = BeautifulSoup(f"<div>{slot_html}</div>", "html.parser").div
+    out = []
+    for prio, (phrase, target) in enumerate(LINK_PHRASES):
+        href = url(target)
+        if target == page["slug"] or href in used:
+            continue
+        for node in frag.find_all(string=True):
+            if node.find_parent("a"):
+                continue
+            m = re.search(r"(?<![\w-])(?:" + phrase + r")(?![\w-])", str(node), re.I)
+            if m:
+                if re.match(r"\s*(?:&|&amp;)\s*SEO Solutions", str(node)[m.end():]):
+                    continue  # never link the brand name
+                out.append((prio, target, m.group(0)))
+                break
+    return out
+
+def _apply(slot_html, phrase_text, href):
+    frag = BeautifulSoup(f"<div>{slot_html}</div>", "html.parser").div
+    for node in frag.find_all(string=True):
+        if node.find_parent("a"):
+            continue
+        s = str(node); i = s.find(phrase_text)
+        if i >= 0:
+            node.replace_with(BeautifulSoup(esc(s[:i]) + f'<a href="{href}">{esc(phrase_text)}</a>' + esc(s[i + len(phrase_text):]), "html.parser"))
+            return "".join(str(c) for c in frag.contents)
+    return slot_html
+
+def interlink(pages, inbound):
+    """Round-robin: each round, every page adds one link to the least-linked target it can reach.
+    One inserted link per paragraph, one link per target per page, self-links skipped."""
+    state = {}
+    for p in pages:
+        used = set()
+        for c, k in _slots(p):
+            used.update(re.findall(r'href="([^"]+)"', c[k]))
+        state[p["slug"]] = {"used": used, "n": 0, "done": set()}
+    progress = True
+    while progress:
+        progress = False
+        for p in pages:
+            st = state[p["slug"]]
+            if st["n"] >= MAX_CONTEXT_LINKS:
+                continue
+            best = None
+            for idx, (c, k) in enumerate(_slots(p)):
+                if idx in st["done"] or "<a " in c[k]:
+                    continue
+                for prio, target, txt in _candidates(p, st["used"], c[k]):
+                    if len(inbound.get(target, ())) >= MAX_INBOUND:
+                        continue
+                    key = (len(inbound.get(target, ())), prio, idx)
+                    if best is None or key < best[0]:
+                        best = (key, c, k, idx, target, txt)
+            if not best:
+                continue
+            _, c, k, idx, target, txt = best
+            c[k] = _apply(c[k], txt, url(target))
+            st["used"].add(url(target)); st["done"].add(idx); st["n"] += 1
+            inbound.setdefault(target, set()).add(p["slug"])
+            progress = True
+
+RELATED = {}
+def plan_related(inbound):
+    """4 related links per service page: 2 from the same cluster, 2 from others,
+    always preferring pages with the fewest inbound links so far."""
+    load = {t: len(inbound.get(t, ())) for t in SERVICES}
+    for slug in SERVICES:
+        pool_same = sorted([t for t in SERVICES if CLUSTER[t] == CLUSTER[slug] and t != slug],
+                           key=lambda t: (load[t], SERVICES.index(t)))
+        pool_other = sorted([t for t in SERVICES if CLUSTER[t] != CLUSTER[slug] and t not in inbound_from(inbound, slug)],
+                            key=lambda t: (load[t], SERVICES.index(t)))
+        pick = pool_same[:2]
+        pick += [t for t in pool_other if t not in pick][:4 - len(pick)]
+        for t in pick:
+            load[t] += 1
+        RELATED[slug] = pick
+    return load
+
+def inbound_from(inbound, slug):
+    """targets this page already links to contextually"""
+    return {t for t, srcs in inbound.items() if slug in srcs}
+
+def related_for(slug):
+    return RELATED.get(slug, [])
+
+# ---------------------------------------------------------------- rendering
+ICON_PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" fill="currentColor"/></svg>'
+CARET = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>'
+
+def header(slug):
+    groups = []
+    for g, items in NAV:
+        active = slug in [s for s, _ in items] and slug != "" or (g == "SEO" and slug == "")
+        links = "".join(f'<li><a href="{url(s)}"{" aria-current=\"page\"" if s == slug else ""}>{esc(l)}</a></li>' for s, l in items)
+        groups.append(f'<li class="nav-group"><details{" data-active" if active else ""}><summary>{esc(g)}{CARET}</summary><ul class="nav-menu">{links}</ul></details></li>')
+    return f'''<a class="skip" href="#main">Skip to content</a>
+<div class="utility"><div class="wrap">
+  <p>Serving Minneapolis &amp; the Twin Cities metro from the North Loop</p>
+  <p>Mon–Fri 8am–6pm, Sat 9am–2pm</p>
+</div></div>
+<header class="site-header"><div class="wrap">
+  <a class="logo" href="/" aria-label="{BRAND} home"><img src="/assets/1094/logo-display.webp" width="560" height="84" alt="{BRAND}"></a>
+  <nav class="nav" id="primary-nav-panel" aria-label="Primary">
+    <ul class="nav-list">{"".join(groups)}<li><a class="nav-link" href="/contact/"{" aria-current=\"page\"" if slug == "contact" else ""}>Contact</a></li></ul>
+  </nav>
+  <a class="btn btn-call" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>{PHONE_DISPLAY}</span></a>
+  <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav-panel"><span></span><span class="sr">Menu</span></button>
+</div></header>'''
+
+def footer():
+    cols = []
+    for g, items in NAV:
+        cols.append(f'<div class="fcol"><p class="fhead">{esc(g)}</p><ul>' +
+                    "".join(f'<li><a href="{url(s)}">{esc(l)}</a></li>' for s, l in items) + "</ul></div>")
+    year = datetime.date.today().year
+    return f'''<footer class="site-footer">
+  <div class="wrap footer-top">
+    <div class="fbrand">
+      <p class="fbig">Get found by the Minneapolis customers already searching for you.</p>
+      <a class="btn btn-primary" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>Call {PHONE_DISPLAY}</span></a>
+      <address>{BRAND}<br>{STREET}<br>{CITY}, {REGION} {ZIP}<br><a href="mailto:{EMAIL}">{EMAIL}</a></address>
+    </div>
+    <nav class="fnav" aria-label="Services">{"".join(cols)}</nav>
+  </div>
+  <div class="wrap footer-base">
+    <p>© {year} {BRAND}</p>
+    <p><a href="/contact/">Contact</a><a href="/privacy-policy/">Privacy Policy</a><a href="/terms-of-use/">Terms of Use</a></p>
+  </div>
+</footer>'''
+
+def serp_card(page):
+    path = " › ".join(["seo4web.pro"] + ([page["slug"]] if page["slug"] else []))
+    return f'''<div class="serp" aria-hidden="true">
+  <p class="serp-label">Search preview</p>
+  <div class="serp-site"><span class="serp-fav"><img src="/assets/1094/favicon-32.png" width="16" height="16" alt=""></span><span><b>{BRAND}</b><br><small>{esc(path)}</small></span></div>
+  <p class="serp-title">{esc(page["title"])}</p>
+  <p class="serp-desc">{esc(page["desc"])}</p>
+</div>'''
+
+def crumbs(page):
+    if not page["slug"]:
+        return ""
+    name = SHORT.get(page["slug"], page.get("crumb", ""))
+    return f'<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">{esc(name)}</li></ol></nav>'
+
+def r_hero(sec, page):
+    chips = "".join(f"<li>{esc(c)}</li>" for c in sec["chips"])
+    img = render_img(sec["img"], "(max-width: 900px) 100vw, 46vw", eager=True) if sec["img"] else ""
+    return f'''<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      {crumbs(page)}
+      <p class="hero-kicker">{esc(sec["kicker"])}</p>
+      <h1>{esc(sec["h1"])}</h1>
+      <p class="lead">{sec["lead"]}</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>Call {PHONE_DISPLAY}</span></a>
+        <a class="btn btn-ghost" href="/contact/">Request a callback</a>
+      </div>
+      {f'<ul class="chips" aria-label="Focus areas">{chips}</ul>' if chips else ""}
+    </div>
+    <figure class="hero-media">{img}{serp_card(page)}</figure>
+  </div>
+</section>'''
+
+def head_block(sec, cls=""):
+    k = f'<p class="dek">{esc(sec["kicker"])}</p>' if sec.get("kicker") else ""
+    i = f'<p class="intro">{sec["intro"]}</p>' if sec.get("intro") else ""
+    return f'<div class="sec-head {cls}"><h2>{esc(sec["h2"])}</h2>{k}{i}</div>'
+
+def r_prose(sec, page, alt):
+    ps = "".join(f"<p>{p}</p>" for p in sec["paras"])
+    return f'<section class="sec prose-sec{alt}"><div class="wrap split">{head_block(sec)}<div class="prose">{ps}</div></div></section>'
+
+def r_media(sec, page, alt, flip):
+    ps = "".join(f"<p>{p}</p>" for p in sec["paras"])
+    return f'''<section class="sec media-sec{alt}"><div class="wrap media{' flip' if flip else ''}">
+  <figure class="media-fig">{render_img(sec["img"], "(max-width: 900px) 100vw, 42vw")}</figure>
+  <div>{head_block(sec)}<div class="prose">{ps}</div></div>
+</div></section>'''
+
+def r_cards(sec, page, alt):
+    items = []
+    for it in sec["items"]:
+        h = f'<a href="{it["href"]}">{esc(it["h"])}</a>' if it["href"] else esc(it["h"])
+        items.append(f'<li class="card{" card-link" if it["href"] else ""}"><h3>{h}</h3><p>{it["p"]}</p></li>')
+    many = " cards-many" if len(items) > 8 else ""
+    return f'<section class="sec{alt}"><div class="wrap">{head_block(sec, "wide")}<ul class="cards{many}">{"".join(items)}</ul></div></section>'
+
+def r_steps(sec, page, alt):
+    items = "".join(f'<li><span class="step-n" aria-hidden="true">{it["n"]}</span><div><h3>{esc(it["h"])}</h3><p>{it["p"]}</p></div></li>' for it in sec["items"])
+    return f'<section class="sec steps-sec"><div class="wrap split">{head_block(sec)}<ol class="steps">{items}</ol></div></section>'
+
+def r_faq(sec, page, alt):
+    items = "".join(f'<details><summary><h3>{esc(it["q"])}</h3><span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>{it["a"]}</p></div></details>' for it in sec["items"])
+    return f'<section class="sec faq-sec{alt}" id="faq"><div class="wrap split">{head_block(sec)}<div class="faq">{items}</div></div></section>'
+
+def r_band(sec, page, alt):
+    return f'''<section class="band"><div class="wrap band-in">
+  <p>{sec["text"]}</p>
+  <a class="btn btn-primary" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>Call for a free quote</span></a>
+</div></section>'''
+
+def r_gallery(sec, page, alt):
+    figs = "".join(f'<figure>{render_img(d, "(max-width: 900px) 100vw, 33vw")}<figcaption>{esc(d["alt"])}</figcaption></figure>' for d in sec["imgs"])
+    return f'<section class="sec{alt}"><div class="wrap">{head_block(sec, "wide")}<div class="gallery">{figs}</div></div></section>'
+
+def r_related(page):
+    if page["slug"] in ("contact",):
+        return ""
+    rel = related_for(page["slug"]) if page["slug"] else []
+    if not rel:
+        return ""
+    desc = SERVICE_BLURB
+    items = "".join(f'<li><a href="{url(s)}"><span class="rel-cluster">{esc(CLUSTER[s])}</span><span class="rel-name">{esc(LONG_NAME[s])}</span><span class="rel-desc">{esc(desc.get(s, ""))}</span></a></li>' for s in rel)
+    return f'''<section class="sec related"><div class="wrap">
+  <div class="sec-head wide"><h2>Related services in Minneapolis</h2><p class="dek">Most projects touch more than one of these. Here is where this work usually connects.</p></div>
+  <ul class="rel">{items}</ul>
+</div></section>'''
+
+def r_final(sec, page, alt):
+    ps = "".join(f"<p>{p}</p>" for p in sec["paras"])
+    return f'''<section class="final"><div class="wrap final-in">
+  <h2>{esc(sec["h2"])}</h2>
+  <div>{ps}<div class="actions">
+    <a class="btn btn-primary" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>Call {PHONE_DISPLAY}</span></a>
+    <a class="btn btn-ghost-light" href="/contact/">Request a callback</a>
+  </div></div>
+</div></section>'''
+
+def render_sections(page):
+    out, alt_toggle, media_n = [], False, 0
+    for sec in page["sections"]:
+        t = sec["type"]
+        alt = " alt" if alt_toggle else ""
+        if t == "hero": out.append(r_hero(sec, page)); continue
+        if t == "band": out.append(r_band(sec, page, alt)); alt_toggle = False; continue
+        if t == "final":
+            out.append(r_related(page)); out.append(r_final(sec, page, alt)); continue
+        if t == "prose": out.append(r_prose(sec, page, alt))
+        elif t == "media": out.append(r_media(sec, page, alt, media_n % 2 == 1)); media_n += 1
+        elif t in ("cards", "areas"): out.append(r_cards(sec, page, alt))
+        elif t == "steps": out.append(r_steps(sec, page, alt)); alt_toggle = True; continue
+        elif t == "faq": out.append(r_faq(sec, page, alt))
+        elif t == "gallery": out.append(r_gallery(sec, page, alt))
+        alt_toggle = not alt_toggle
+    return "\n".join(out)
+
+# ---------------------------------------------------------------- schema
+def business_ld():
+    return {
+        "@type": ["ProfessionalService", "LocalBusiness"], "@id": ORIGIN + "/#business",
+        "name": BRAND, "url": ORIGIN + "/", "email": EMAIL, "telephone": PHONE_LD,
+        "logo": {"@type": "ImageObject", "url": ORIGIN + "/assets/1094/logo.png", "width": 2100, "height": 316},
+        "image": ORIGIN + "/assets/1094/brand/search-engine-optimization-minneapolis-workspace.webp",
+        "description": "Website design, search engine optimization and digital marketing for Minneapolis businesses.",
+        "priceRange": "$$",
+        "address": {"@type": "PostalAddress", "streetAddress": STREET, "addressLocality": CITY,
+                    "addressRegion": REGION, "postalCode": ZIP, "addressCountry": "US"},
+        "openingHoursSpecification": [
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "08:00", "closes": "18:00"},
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "14:00"}],
+        "areaServed": [{"@type": "City", "name": "Minneapolis", "sameAs": "https://en.wikipedia.org/wiki/Minneapolis"},
+                       {"@type": "AdministrativeArea", "name": "Minneapolis–Saint Paul metropolitan area"}],
+        "knowsAbout": ["Search engine optimization", "Local SEO", "Website design", "Web development", "WordPress",
+                       "Pay-per-click advertising", "Social media marketing", "Branding", "Graphic design"],
+        "contactPoint": {"@type": "ContactPoint", "telephone": PHONE_LD, "email": EMAIL, "contactType": "sales",
+                         "areaServed": "US", "availableLanguage": "English"},
+    }
+
+def page_ld(page, kind="WebPage"):
+    u = absu(page["slug"])
+    graph = [business_ld(),
+             {"@type": "WebSite", "@id": ORIGIN + "/#website", "url": ORIGIN + "/", "name": BRAND,
+              "inLanguage": "en-US", "publisher": {"@id": ORIGIN + "/#business"}}]
+    wp = {"@type": kind, "@id": u + "#webpage", "url": u, "name": page["title"], "description": page["desc"],
+          "inLanguage": "en-US", "isPartOf": {"@id": ORIGIN + "/#website"}, "dateModified": TODAY,
+          "about": {"@id": ORIGIN + "/#business"}}
+    hero = next((s for s in page.get("sections", []) if s["type"] == "hero" and s.get("img")), None)
+    if hero:
+        wp["primaryImageOfPage"] = {"@type": "ImageObject", "url": ORIGIN + hero["img"]["src"],
+                                    "width": int(hero["img"]["w"]), "height": int(hero["img"]["h"]), "caption": hero["img"]["alt"]}
+    if page["slug"]:
+        wp["breadcrumb"] = {"@id": u + "#breadcrumb"}
+        graph.append({"@type": "BreadcrumbList", "@id": u + "#breadcrumb", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": ORIGIN + "/"},
+            {"@type": "ListItem", "position": 2, "name": page.get("crumb") or SHORT.get(page["slug"], page["title"]), "item": u}]})
+    graph.append(wp)
+    if page["slug"] in SERVICES or page["slug"] == "":
+        h1 = next(s["h1"] for s in page["sections"] if s["type"] == "hero")
+        svc = {"@type": "Service", "@id": u + "#service", "name": h1, "serviceType": LONG_NAME.get(page["slug"], h1),
+               "description": page["desc"], "url": u, "provider": {"@id": ORIGIN + "/#business"},
+               "areaServed": {"@type": "City", "name": "Minneapolis"}}
+        if page["slug"] == "":
+            svc["hasOfferCatalog"] = {"@type": "OfferCatalog", "name": "Website design, SEO and marketing services",
+                                      "itemListElement": [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": LONG_NAME[s], "url": absu(s)}} for s in SERVICES if s]}
+        graph.append(svc)
+        wp["mainEntity"] = {"@id": u + "#service"}
+    faq = next((s for s in page.get("sections", []) if s["type"] == "faq"), None)
+    if faq:
+        graph.append({"@type": "FAQPage", "@id": u + "#faq", "isPartOf": {"@id": u + "#webpage"}, "mainEntity": [
+            {"@type": "Question", "name": it["q"], "acceptedAnswer": {"@type": "Answer",
+             "text": BeautifulSoup(it["a"], "html.parser").get_text()}} for it in faq["items"]]})
+    return json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, separators=(",", ":"))
+
+# ---------------------------------------------------------------- document
+def document(page, body, ld, og_img=None, robots="index, follow, max-image-preview:large, max-snippet:-1"):
+    u = absu(page["slug"])
+    og_img = og_img or {"src": "/assets/1094/brand/search-engine-optimization-minneapolis-workspace.webp", "w": "1000", "h": "750",
+                        "alt": "Website Design & SEO Solutions team workspace in Minneapolis"}
+    preload = ""
+    hero = next((s for s in page.get("sections", []) if s["type"] == "hero" and s.get("img")), None)
+    if hero and hero["img"]["srcset"]:
+        preload = f'<link rel="preload" as="image" href="{hero["img"]["src"]}" imagesrcset="{hero["img"]["srcset"]}" imagesizes="(max-width: 900px) 100vw, 46vw" fetchpriority="high">'
+    return f'''<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{esc(page["title"])}</title>
+<meta name="description" content="{esc(page["desc"])}">
+<meta name="robots" content="{robots}">
+<link rel="canonical" href="{u}">
+<meta name="theme-color" content="#002B53">
+<meta name="format-detection" content="telephone=no">
+<meta name="geo.region" content="US-MN"><meta name="geo.placename" content="Minneapolis">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="{BRAND}">
+<meta property="og:title" content="{esc(page["title"])}">
+<meta property="og:description" content="{esc(page["desc"])}">
+<meta property="og:url" content="{u}">
+<meta property="og:image" content="{ORIGIN}{og_img["src"]}">
+<meta property="og:image:width" content="{og_img["w"]}"><meta property="og:image:height" content="{og_img["h"]}">
+<meta property="og:image:alt" content="{esc(og_img["alt"])}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{esc(page["title"])}">
+<meta name="twitter:description" content="{esc(page["desc"])}">
+<meta name="twitter:image" content="{ORIGIN}{og_img["src"]}">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/1094/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/1094/favicon-180.png">
+<link rel="alternate" type="text/markdown" href="/llms.txt" title="LLM-friendly site guide">
+<link rel="preload" href="/fonts/bricolage-grotesque-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/source-serif-4-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
+{preload}
+<link rel="stylesheet" href="/site.css?v={ASSET_V}">
+<script type="application/ld+json">{ld}</script>
+</head>
+<body>
+{header(page["slug"])}
+<main id="main">
+{body}
+</main>
+{footer()}
+<script src="/site.js?v={ASSET_V}" defer></script>
+</body>
+</html>
+'''
+
+# ---------------------------------------------------------------- simple pages
+def contact_page():
+    page = {"slug": "contact", "crumb": "Contact", "title": "Contact Website Design & SEO Solutions | Minneapolis",
+            "desc": f"Call {PHONE_DISPLAY} or email {EMAIL} to talk about website design, SEO or digital marketing for your Minneapolis business. Office in the North Loop.",
+            "sections": []}
+    svc = "".join(f'<li><a href="{url(s)}">{esc(LONG_NAME[s])}</a></li>' for s in SERVICES)
+    body = f'''<section class="hero hero-plain"><div class="wrap">
+  {crumbs(page)}
+  <h1>Talk to a Minneapolis web design and SEO team</h1>
+  <p class="lead">Tell us about your website, the services you want to be found for, and the area you serve. We will come back with an honest view of what is worth doing first.</p>
+</div></section>
+<section class="sec"><div class="wrap contact-grid">
+  <div class="contact-cards">
+    <a class="ccard ccard-main" href="tel:{PHONE_TEL}"><span class="cl">Call</span><span class="cv">{PHONE_DISPLAY}</span><span class="cn">Fastest way to reach us during business hours</span></a>
+    <a class="ccard" href="mailto:{EMAIL}?subject=Website%20%2F%20SEO%20enquiry"><span class="cl">Email</span><span class="cv">{EMAIL}</span><span class="cn">Include your website address and what you need</span></a>
+    <a class="ccard" href="https://www.google.com/maps/search/?api=1&amp;query=530+N+3rd+St+Minneapolis+MN+55401" rel="noopener" target="_blank"><span class="cl">Visit</span><span class="cv">{STREET}, {CITY}, {REGION} {ZIP}</span><span class="cn">North Loop office. Opens in Google Maps.</span></a>
+  </div>
+  <div class="contact-side">
+    <h2>Hours</h2>
+    <table class="hours"><tr><th scope="row">Monday–Friday</th><td>8am–6pm</td></tr><tr><th scope="row">Saturday</th><td>9am–2pm</td></tr><tr><th scope="row">Sunday</th><td>Closed</td></tr></table>
+    <h2>What helps us prepare</h2>
+    <ul class="ticks"><li>Your website address</li><li>Your main services and the areas you serve</li><li>What is not working today, and any reports you already have</li></ul>
+  </div>
+</div></section>
+<section class="sec alt"><div class="wrap">
+  <div class="sec-head wide"><h2>Services we can talk through</h2><p class="dek">Serving Minneapolis, Minnesota and the surrounding Twin Cities metro.</p></div>
+  <ul class="svc-list">{svc}</ul>
+</div></section>'''
+    return page, body
+
+def legal_page(slug):
+    s = BeautifulSoup(open(os.path.join(SRC, slug, "index.html"), encoding="utf-8").read(), "lxml")
+    m = s.main
+    h1 = fix_brand(text(m.find("h1")))
+    parts = []
+    for el in m.find_all(["h2", "h3", "p", "ul", "ol", "address"]):
+        if el.find_parent(["ul", "ol"]) and el.name in ("p",):
+            continue
+        if el.name in ("ul", "ol"):
+            if el.find_parent(["ul", "ol"]): continue
+            parts.append(f"<{el.name}>" + "".join(f"<li>{inner(li)}</li>" for li in el.find_all("li", recursive=False)) + f"</{el.name}>")
+        elif el.name in ("h2", "h3"):
+            parts.append(f"<{el.name}>{esc(fix_brand(text(el)))}</{el.name}>")
+        else:
+            if el.find_parent("address") : continue
+            t = inner(el)
+            if t: parts.append(f"<p>{t}</p>")
+    names = {"privacy-policy": ("Privacy Policy", "How Website Design & SEO Solutions handles information you share when you visit this website, call or email us."),
+             "terms-of-use": ("Terms of Use", "The terms that apply when you use the Website Design & SEO Solutions website in Minneapolis, Minnesota.")}
+    crumb, desc = names[slug]
+    page = {"slug": slug, "crumb": crumb, "title": f"{crumb} | {BRAND}", "desc": desc, "sections": []}
+    body = f'''<section class="hero hero-plain"><div class="wrap">{crumbs(page)}<h1>{esc(h1)}</h1></div></section>
+<section class="sec"><div class="wrap"><div class="prose doc">{"".join(parts)}</div></div></section>'''
+    return page, body
+
+def notfound_page():
+    page = {"slug": "404", "title": f"Page not found | {BRAND}", "desc": "This page does not exist.", "sections": []}
+    svc = "".join(f'<li><a href="{url(s)}">{esc(LONG_NAME[s])}</a></li>' for s in SERVICES)
+    body = f'''<section class="hero hero-plain"><div class="wrap">
+  <h1>This page isn't here</h1>
+  <p class="lead">The link may be old or mistyped. Start from the <a href="/">homepage</a>, pick a service below, or call {PHONE_DISPLAY}.</p>
+</div></section>
+<section class="sec"><div class="wrap"><ul class="svc-list">{svc}</ul></div></section>'''
+    return page, body
+
+# ---------------------------------------------------------------- main
+LONG_NAME = {"": "Search Engine Optimization (SEO)",
+             "minneapolis-web-design-companies": "Website Design",
+             "web-developers-minneapolis": "Web Development",
+             "wordpress-design-minneapolis": "WordPress Design",
+             "design-agency-minneapolis": "Design Agency Services",
+             "graphic-design-firm-minneapolis": "Graphic Design",
+             "minneapolis-seo-consultant": "SEO Consulting",
+             "local-seo-minneapolis": "Local SEO",
+             "digital-marketing-minneapolis-mn": "Digital Marketing",
+             "marketing-minneapolis": "Marketing Services",
+             "online-marketing-minneapolis": "Online Marketing",
+             "minneapolis-marketing-firms": "Full-Service Marketing Firm",
+             "minneapolis-ppc-management": "PPC Management",
+             "social-media-marketing-minneapolis": "Social Media Marketing",
+             "advertising-companies-minneapolis": "Advertising",
+             "creative-agencies-minneapolis": "Creative Agency Services",
+             "branding-agency-minneapolis": "Branding"}
+SERVICE_BLURB = {}
+
+def main():
+    if os.path.exists(OUT):
+        shutil.rmtree(OUT)
+    os.makedirs(OUT)
+    # static assets
+    shutil.copytree(os.path.join(SRC, "assets"), os.path.join(OUT, "assets"))
+    shutil.copytree(os.path.join(SRC, "okf"), os.path.join(OUT, "okf"))
+    for f in ("favicon.ico",):
+        shutil.copy(os.path.join(SRC, f), OUT)
+    os.makedirs(os.path.join(OUT, "fonts"))
+    shutil.copy(f"{FONTS}/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2", f"{OUT}/fonts/bricolage-grotesque-latin-wght.woff2")
+    shutil.copy(f"{FONTS}/source-serif-4/files/source-serif-4-latin-wght-normal.woff2", f"{OUT}/fonts/source-serif-4-latin-wght.woff2")
+    shutil.copy(f"{FONTS}/source-serif-4/files/source-serif-4-latin-wght-italic.woff2", f"{OUT}/fonts/source-serif-4-latin-wght-italic.woff2")
+    here = os.path.dirname(os.path.abspath(__file__))
+    shutil.copy(os.path.join(here, "site.css"), OUT)
+    shutil.copy(os.path.join(here, "site.js"), OUT)
+
+    pages = [extract_page(s) for s in [""] + SERVICES]
+    # service blurbs from homepage "Related Services" cards
+    for sec in pages[0]["sections"]:
+        if sec["type"] == "cards":
+            for it in sec["items"]:
+                if it["href"]:
+                    SERVICE_BLURB[it["href"].strip("/")] = BeautifulSoup(it["p"], "html.parser").get_text()
+    SERVICE_BLURB[""] = "Technical SEO, content priorities, local signals and reporting that ties search visibility to real inquiries."
+    # make homepage service cards use clearer names
+    for sec in pages[0]["sections"]:
+        if sec["type"] == "cards" and any(it["href"] for it in sec["items"]):
+            for it in sec["items"]:
+                it["h"] = LONG_NAME.get(it["href"].strip("/"), it["h"])
+            sec["h2"] = "Website, Search and Marketing Services"
+
+    inbound = {}
+    interlink(pages, inbound)
+    load = plan_related(inbound)
+
+    report = []
+    for p in pages:
+        body = render_sections(p)
+        hero = next(s for s in p["sections"] if s["type"] == "hero")
+        og = {"src": hero["img"]["src"], "w": hero["img"]["w"], "h": hero["img"]["h"], "alt": hero["img"]["alt"]} if hero.get("img") else None
+        d = os.path.join(OUT, p["slug"]) if p["slug"] else OUT
+        os.makedirs(d, exist_ok=True)
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(document(p, body, page_ld(p), og))
+        report.append(p)
+
+    extra = [contact_page(), legal_page("privacy-policy"), legal_page("terms-of-use")]
+    for p, body in extra:
+        kind = "ContactPage" if p["slug"] == "contact" else "WebPage"
+        d = os.path.join(OUT, p["slug"]); os.makedirs(d, exist_ok=True)
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(document(p, body, page_ld(p, kind)))
+    p, body = notfound_page()
+    open(os.path.join(OUT, "404.html"), "w", encoding="utf-8").write(
+        document(p, body, json.dumps({"@context": "https://schema.org", "@type": "WebPage", "name": p["title"]}), robots="noindex, follow"))
+
+    # sitemap
+    urls = [("", "1.0", "weekly")] + [(s, "0.8", "monthly") for s in SERVICES if s] + \
+           [("contact", "0.6", "yearly"), ("privacy-policy", "0.2", "yearly"), ("terms-of-use", "0.2", "yearly")]
+    sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">']
+    heroes = {p["slug"]: next(s for s in p["sections"] if s["type"] == "hero").get("img") for p in pages}
+    for s, pr, cf in urls:
+        img = heroes.get(s)
+        im = f'<image:image><image:loc>{ORIGIN}{img["src"]}</image:loc></image:image>' if img else ""
+        sm.append(f"  <url><loc>{absu(s)}</loc><lastmod>{TODAY}</lastmod>{im}</url>")
+    sm.append("</urlset>")
+    open(os.path.join(OUT, "sitemap.xml"), "w").write("\n".join(sm) + "\n")
+    open(os.path.join(OUT, "robots.txt"), "w").write(
+        f"User-agent: *\nAllow: /\n\nSitemap: {ORIGIN}/sitemap.xml\n\n# Plain-text guide for AI assistants: {ORIGIN}/llms.txt\n")
+    # llms.txt + okf: fix brand capitalisation & add contact page
+    llms = fix_brand(open(os.path.join(SRC, "llms.txt"), encoding="utf-8").read())
+    open(os.path.join(OUT, "llms.txt"), "w", encoding="utf-8").write(llms)
+    for f in os.listdir(os.path.join(OUT, "okf")):
+        fp = os.path.join(OUT, "okf", f)
+        open(fp, "w", encoding="utf-8").write(fix_brand(open(fp, encoding="utf-8").read()))
+    # Cloudflare Pages config
+    open(os.path.join(OUT, "_headers"), "w").write("""/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+/site.css
+  Cache-Control: public, max-age=31536000, immutable
+/site.js
+  Cache-Control: public, max-age=31536000, immutable
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+/
+  Cache-Control: public, max-age=0, must-revalidate
+""")
+    open(os.path.join(OUT, "_redirects"), "w").write(
+        "/home / 301\n/services / 301\n")
+    # report
+    print("Inbound links per service page (contextual + related block):")
+    for s in SERVICES:
+        print(f"  {url(s):42} {len(inbound.get(s, [])):2} + {load[s] - len(inbound.get(s, [])):2} = {load[s]}")
+
+if __name__ == "__main__":
+    main()

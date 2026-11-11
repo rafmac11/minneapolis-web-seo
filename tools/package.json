@@ -1,0 +1,9 @@
+{
+  "name": "seo4web-build-tools",
+  "private": true,
+  "description": "Font sources for the seo4web.pro build",
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.0.0",
+    "@fontsource-variable/source-serif-4": "^5.0.0"
+  }
+}
