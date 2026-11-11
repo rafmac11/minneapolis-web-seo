@@ -8,7 +8,7 @@
     });
   }
   var groups = Array.prototype.slice.call(document.querySelectorAll('.nav details'));
-  var desktop = window.matchMedia('(min-width: 1021px) and (hover: hover)');
+  var desktop = window.matchMedia('(min-width: 1181px) and (hover: hover)');
   function closeAll(except) {
     groups.forEach(function (d) { if (d !== except) d.removeAttribute('open'); });
   }

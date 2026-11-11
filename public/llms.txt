@@ -25,3 +25,7 @@
 ## Structured knowledge
 
 - [Open Knowledge Format bundle](https://seo4web.pro/okf/index.md): machine-readable version of this site's content (OKF v0.2).
+
+## About
+
+- [About us](https://seo4web.pro/about/): Started 12 years ago by business owners who learned SEO to grow their own business; today a Minnesota team of web designers and SaaS developers serving clients nationwide.

@@ -29,7 +29,7 @@ p{margin:0 0 1.1em}
 .skip:focus{position:fixed;left:12px;top:12px;width:auto;height:auto;clip:auto;z-index:100;background:var(--white);padding:.6rem 1rem;font-family:var(--display)}
 
 /* ---------- buttons */
-.btn{display:inline-flex;align-items:center;gap:.55rem;font:650 1rem/1 var(--display);padding:.95rem 1.35rem;border-radius:6px;text-decoration:none;border:2px solid transparent;transition:background-color .15s,color .15s,border-color .15s}
+.btn{white-space:nowrap;display:inline-flex;align-items:center;gap:.55rem;font:650 1rem/1 var(--display);padding:.95rem 1.35rem;border-radius:6px;text-decoration:none;border:2px solid transparent;transition:background-color .15s,color .15s,border-color .15s}
 .btn svg{width:1.05em;height:1.05em;flex:none}
 .btn-primary{background:var(--orange);color:var(--night)}
 .btn-primary:hover{background:#FFA033;color:var(--night)}
@@ -47,9 +47,9 @@ p{margin:0 0 1.1em}
 .site-header .wrap{display:flex;align-items:center;gap:1.5rem;min-height:76px}
 .logo img{width:clamp(220px,24vw,300px)}
 .nav{margin-left:auto}
-.nav-list{display:flex;align-items:center;gap:.25rem;list-style:none;margin:0;padding:0}
+.nav-list{display:flex;align-items:center;gap:.1rem;list-style:none;margin:0;padding:0}
 .nav-group{position:relative}
-.nav summary,.nav-link{display:flex;align-items:center;gap:.35rem;cursor:pointer;list-style:none;font:600 .98rem/1 var(--display);color:var(--navy);padding:.7rem .75rem;border-radius:6px;text-decoration:none}
+.nav summary,.nav-link{white-space:nowrap;display:flex;align-items:center;gap:.35rem;cursor:pointer;list-style:none;font:600 .98rem/1 var(--display);color:var(--navy);padding:.7rem .75rem;border-radius:6px;text-decoration:none}
 .nav summary::-webkit-details-marker{display:none}
 .nav summary svg{width:.75rem;height:.75rem;transition:transform .15s}
 .nav details[open] summary svg{transform:rotate(180deg)}
@@ -138,6 +138,8 @@ p{margin:0 0 1.1em}
 .steps li{display:grid;grid-template-columns:4.5rem 1fr;gap:1.25rem;padding:1.6rem 0;border-top:1px solid rgba(255,255,255,.18)}
 .steps li:first-child{border-top:0;padding-top:0}
 .step-n{font:780 2.6rem/1 var(--display);color:var(--orange);letter-spacing:-.04em}
+.timeline li{grid-template-columns:8.5rem 1fr}
+.timeline .step-n{font-size:1.35rem;line-height:1.15;letter-spacing:-.015em;padding-top:.35rem}
 .steps h3{margin:.35rem 0 .5rem}
 .steps p{margin:0;font-size:1.05rem}
 
@@ -231,7 +233,7 @@ p{margin:0 0 1.1em}
   .fnav{grid-template-columns:repeat(2,minmax(0,1fr))}
   .footer-top{grid-template-columns:1fr}
 }
-@media (max-width:1020px){
+@media (max-width:1180px){
   .utility p+p{display:none}
   .btn-call span{display:none}
   .btn-call{padding:.8rem;margin-left:auto}
@@ -248,6 +250,8 @@ p{margin:0 0 1.1em}
   .nav summary,.nav-link{justify-content:space-between;padding:1rem .25rem;font-size:1.08rem;border-bottom:1px solid var(--ice);border-radius:0}
   .nav details[data-active] summary,.nav-link[aria-current]{box-shadow:none;color:var(--orange-ink)}
   .nav-menu{position:static;box-shadow:none;border:0;padding:.25rem 0 .75rem .75rem;min-width:0}
+}
+@media (max-width:1020px){
   .hero-grid,.split,.media,.final-in,.contact-grid{grid-template-columns:1fr}
   .split>.sec-head,.steps-side{position:static}
   .media.flip .media-fig{order:0}
@@ -264,6 +268,7 @@ p{margin:0 0 1.1em}
   .cards,.cards-many,.rel,.gallery{grid-template-columns:1fr}
   .steps li{grid-template-columns:3.2rem 1fr}
   .step-n{font-size:2rem}
+  .timeline li{grid-template-columns:1fr;gap:.25rem}
   .fnav{grid-template-columns:1fr 1fr}
   .footer-base a{margin:0 1rem 0 0}
   .ans{padding-right:0}

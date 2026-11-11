@@ -365,13 +365,13 @@ def header(slug):
         groups.append(f'<li class="nav-group"><details{" data-active" if active else ""}><summary>{esc(g)}{CARET}</summary><ul class="nav-menu">{links}</ul></details></li>')
     return f'''<a class="skip" href="#main">Skip to content</a>
 <div class="utility"><div class="wrap">
-  <p>Serving Minneapolis &amp; the Twin Cities metro from the North Loop</p>
+  <p>Based in Minneapolis, serving clients nationwide</p>
   <p>Mon–Fri 8am–6pm, Sat 9am–2pm</p>
 </div></div>
 <header class="site-header"><div class="wrap">
   <a class="logo" href="/" aria-label="{BRAND} home"><img src="/assets/1094/logo-display.webp" width="560" height="84" alt="{BRAND}"></a>
   <nav class="nav" id="primary-nav-panel" aria-label="Primary">
-    <ul class="nav-list">{"".join(groups)}<li><a class="nav-link" href="/contact/"{" aria-current=\"page\"" if slug == "contact" else ""}>Contact</a></li></ul>
+    <ul class="nav-list">{"".join(groups)}<li><a class="nav-link" href="/about/"{" aria-current=\"page\"" if slug == "about" else ""}>About</a></li><li><a class="nav-link" href="/contact/"{" aria-current=\"page\"" if slug == "contact" else ""}>Contact</a></li></ul>
   </nav>
   <a class="btn btn-call" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>{PHONE_DISPLAY}</span></a>
   <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav-panel"><span></span><span class="sr">Menu</span></button>
@@ -394,7 +394,7 @@ def footer():
   </div>
   <div class="wrap footer-base">
     <p>© {year} {BRAND}</p>
-    <p><a href="/contact/">Contact</a><a href="/privacy-policy/">Privacy Policy</a><a href="/terms-of-use/">Terms of Use</a></p>
+    <p><a href="/about/">About</a><a href="/contact/">Contact</a><a href="/privacy-policy/">Privacy Policy</a><a href="/terms-of-use/">Terms of Use</a></p>
   </div>
 </footer>'''
 
@@ -410,7 +410,7 @@ def serp_card(page):
 def crumbs(page):
     if not page["slug"]:
         return ""
-    name = SHORT.get(page["slug"], page.get("crumb", ""))
+    name = page.get("crumb") or SHORT.get(page["slug"], "")
     return f'<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">{esc(name)}</li></ol></nav>'
 
 def r_hero(sec, page):
@@ -460,7 +460,7 @@ def r_cards(sec, page, alt):
 def r_steps(sec, page, alt):
     fig = f'<figure class="steps-fig">{render_img(sec["img"], "(max-width: 1020px) 100vw, 36vw")}</figure>' if sec.get("img") else ""
     items = "".join(f'<li><span class="step-n" aria-hidden="true">{it["n"]}</span><div><h3>{esc(it["h"])}</h3><p>{it["p"]}</p></div></li>' for it in sec["items"])
-    return f'<section class="sec steps-sec"><div class="wrap split"><div class="steps-side">{head_block(sec)}{fig}</div><ol class="steps">{items}</ol></div></section>'
+    return f'<section class="sec steps-sec"><div class="wrap split"><div class="steps-side">{head_block(sec)}{fig}</div><ol class="steps{' timeline' if sec.get('timeline') else ''}">{items}</ol></div></section>'
 
 def r_faq(sec, page, alt):
     items = "".join(f'<details><summary><h3>{esc(it["q"])}</h3><span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>{it["a"]}</p></div></details>' for it in sec["items"])
@@ -533,7 +533,8 @@ def business_ld():
             {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "08:00", "closes": "18:00"},
             {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "14:00"}],
         "areaServed": [{"@type": "City", "name": "Minneapolis", "sameAs": "https://en.wikipedia.org/wiki/Minneapolis"},
-                       {"@type": "AdministrativeArea", "name": "Minneapolis–Saint Paul metropolitan area"}],
+                       {"@type": "AdministrativeArea", "name": "Minneapolis–Saint Paul metropolitan area"},
+                       {"@type": "Country", "name": "United States"}],
         "knowsAbout": ["Search engine optimization", "Local SEO", "Website design", "Web development", "WordPress",
                        "Pay-per-click advertising", "Social media marketing", "Branding", "Graphic design"],
         "contactPoint": {"@type": "ContactPoint", "telephone": PHONE_LD, "email": EMAIL, "contactType": "sales",
@@ -695,6 +696,52 @@ def notfound_page():
 <section class="sec"><div class="wrap"><ul class="svc-list">{svc}</ul></div></section>'''
     return page, body
 
+def about_page():
+    team = {"src": "/assets/1094/brand/search-engine-optimization-minneapolis-team.webp", "w": "900", "h": "675",
+            "alt": "Website Design & SEO Solutions team reviewing a client website together in the Minneapolis office",
+            "srcset": "/assets/1094/brand/search-engine-optimization-minneapolis-team-w400.webp 400w, /assets/1094/brand/search-engine-optimization-minneapolis-team-w600.webp 600w, /assets/1094/brand/search-engine-optimization-minneapolis-team-w800.webp 800w, /assets/1094/brand/search-engine-optimization-minneapolis-team.webp 900w"}
+    work = {"src": "/assets/1094/brand/search-engine-optimization-minneapolis-workspace.webp", "w": "1000", "h": "750",
+            "alt": "Website Design & SEO Solutions workspace in the North Loop, Minneapolis",
+            "srcset": "/assets/1094/brand/search-engine-optimization-minneapolis-workspace-w400.webp 400w, /assets/1094/brand/search-engine-optimization-minneapolis-workspace-w600.webp 600w, /assets/1094/brand/search-engine-optimization-minneapolis-workspace-w800.webp 800w, /assets/1094/brand/search-engine-optimization-minneapolis-workspace.webp 1000w"}
+    sections = [
+        {"type": "hero", "kicker": "About Website Design & SEO Solutions",
+         "h1": "We learned SEO to grow our own business first",
+         "lead": "Twelve years ago we needed more customers for a business we already ran. Learning how websites and search engines work changed that business, and it became the work we now do for other owners.",
+         "chips": ["Business owners first", "12 years in SEO", "Minnesota based, clients nationwide"], "img": team},
+        {"type": "steps", "timeline": True, "kicker": "From one business to many", "h2": "How We Got Here",
+         "intro": "We did not start as an agency. We started as a business that needed the phone to ring.",
+         "items": [
+            {"n": "12 years ago", "h": "Our own business needed to grow",
+             "p": "We ran a business that depended on new customers finding us. Buying leads was expensive and unpredictable, so we started learning how websites and search engines actually work."},
+            {"n": "Then", "h": "We found a way to rank",
+             "p": "Testing on our own site showed us what moved rankings and what did not: solid technical foundations, a useful page for every service, and consistent local signals. Calls started coming from search instead of ads."},
+            {"n": "Next", "h": "Friends and other owners asked for help",
+             "p": "Other business owners noticed and asked us to do the same for them. We started with friends and local businesses, and treated every site as if our own revenue depended on it."},
+            {"n": "Today", "h": "A team of designers and SaaS developers",
+             "p": "We now have web designers and SaaS developers who build websites, run SEO and automate the whole lead acquisition process, from the first search to the follow-up."}]},
+        {"type": "media", "kicker": "", "intro": "", "img": work, "h2": "Business Owners Before We Were an Agency",
+         "paras": ["That background shapes how we work. We judge a website by the calls, forms and booked jobs it brings in, not by the number of reports it produces. When we recommend something, it is what we would do with our own budget.",
+                   "It also means we explain things plainly. You should know what we are changing, why it matters for your business, and how you will see whether it worked.",
+                   "Every project starts the way ours did: find out how your customers search, build the pages and <a href=\"/\">search engine optimization</a> that answer them, and make sure no lead gets lost on the way to you."]},
+        {"type": "cards", "kicker": "Design, search and automation under one roof", "h2": "What Our Team Does Today", "intro": "",
+         "items": [
+            {"h": "Website Design", "href": "/minneapolis-web-design-companies/", "p": "Fast, clear websites built around the services you sell and the areas you serve, designed to turn visits into calls and inquiries."},
+            {"h": "Search Engine Optimization", "href": "/", "p": "Technical fixes, service pages and content priorities that help the right customers find you when they search."},
+            {"h": "Local SEO", "href": "/local-seo-minneapolis/", "p": "Google Business Profile, map visibility and local signals for businesses that depend on nearby customers."},
+            {"h": "Web Development and Custom Tools", "href": "/web-developers-minneapolis/", "p": "Our SaaS developers build the integrations and custom features a standard website template cannot handle."},
+            {"h": "Lead Acquisition Automation", "href": "", "p": "Forms, calls, ads and your CRM connected so every new lead is captured, routed to the right person and followed up automatically."},
+            {"h": "PPC Management", "href": "/minneapolis-ppc-management/", "p": "Paid search for when you need leads sooner, measured against the same conversions as your organic traffic."}]},
+        {"type": "prose", "kicker": "", "intro": "", "h2": "Based in Minnesota, Working With Clients Nationwide",
+         "paras": ["Our office is at 530 N 3rd St in the North Loop of Minneapolis, and we know the Twin Cities market well. Most of our work happens online, so we also design websites and run search campaigns for businesses across the United States.",
+                   "Whether you serve one neighborhood or several states, the approach is the same: learn how your customers search, give them pages that answer their questions, and connect every inquiry to a fast follow-up."]},
+        {"type": "final", "kicker": "", "intro": "", "h2": "Let's Talk About Growing Your Business",
+         "paras": ["Tell us what you sell, where you sell it and what is not working today. We will give you a straight answer about what we would do first.", ], "bg": "/assets/1094/extra/minneapolis-skyline.webp"},
+    ]
+    return {"slug": "about", "crumb": "About", "kind": "AboutPage",
+            "title": "About Us | Website Design & SEO Solutions, Minneapolis",
+            "desc": "A Minnesota team that learned SEO growing its own business 12 years ago. Today our web designers and SaaS developers help businesses nationwide grow.",
+            "sections": sections}
+
 # ---------------------------------------------------------------- main
 LONG_NAME = {"": "Search Engine Optimization (SEO)",
              "minneapolis-web-design-companies": "Website Design",
@@ -736,6 +783,11 @@ def main():
     pages = [extract_page(s) for s in [""] + SERVICES]
     for p in pages:
         apply_extra_images(p)
+    # homepage "About" section links to the new About page
+    for sec in pages[0]["sections"]:
+        if sec["type"] == "media" and sec["h2"].startswith("About"):
+            sec["paras"].append('<a href="/about/">Read how we started and who is on the team</a>.')
+    pages.append(about_page())
     # service blurbs from homepage "Related Services" cards
     for sec in pages[0]["sections"]:
         if sec["type"] == "cards":
@@ -758,10 +810,11 @@ def main():
     for p in pages:
         body = render_sections(p)
         hero = next(s for s in p["sections"] if s["type"] == "hero")
+        og_ld = page_ld(p, p.get("kind", "WebPage"))
         og = {"src": hero["img"]["src"], "w": hero["img"]["w"], "h": hero["img"]["h"], "alt": hero["img"]["alt"]} if hero.get("img") else None
         d = os.path.join(OUT, p["slug"]) if p["slug"] else OUT
         os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(document(p, body, page_ld(p), og))
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(document(p, body, og_ld, og))
         report.append(p)
 
     extra = [contact_page(), legal_page("privacy-policy"), legal_page("terms-of-use")]
@@ -775,7 +828,7 @@ def main():
 
     # sitemap
     urls = [("", "1.0", "weekly")] + [(s, "0.8", "monthly") for s in SERVICES if s] + \
-           [("contact", "0.6", "yearly"), ("privacy-policy", "0.2", "yearly"), ("terms-of-use", "0.2", "yearly")]
+           [("about", "0.6", "yearly"), ("contact", "0.6", "yearly"), ("privacy-policy", "0.2", "yearly"), ("terms-of-use", "0.2", "yearly")]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">']
     heroes = {p["slug"]: next(s for s in p["sections"] if s["type"] == "hero").get("img") for p in pages}
     for s, pr, cf in urls:
@@ -788,6 +841,7 @@ def main():
         f"User-agent: *\nAllow: /\n\nSitemap: {ORIGIN}/sitemap.xml\n\n# Plain-text guide for AI assistants: {ORIGIN}/llms.txt\n")
     # llms.txt + okf: fix brand capitalisation & add contact page
     llms = fix_brand(open(os.path.join(SRC, "llms.txt"), encoding="utf-8").read())
+    llms = llms.rstrip() + "\n\n## About\n\n- [About us](https://seo4web.pro/about/): Started 12 years ago by business owners who learned SEO to grow their own business; today a Minnesota team of web designers and SaaS developers serving clients nationwide.\n"
     open(os.path.join(OUT, "llms.txt"), "w", encoding="utf-8").write(llms)
     for f in os.listdir(os.path.join(OUT, "okf")):
         fp = os.path.join(OUT, "okf", f)
