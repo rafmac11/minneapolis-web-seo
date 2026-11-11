@@ -18,6 +18,10 @@ TODAY = datetime.date.today().isoformat()
 FONTS = "/home/claude/tools/node_modules/@fontsource-variable"
 ASSET_V = TODAY.replace("-", "")
 
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location("leadgen_content", os.path.join(os.path.dirname(os.path.abspath(__file__)), "leadgen_content.py"))
+LG = _ilu.module_from_spec(_spec); _spec.loader.exec_module(LG)
+
 # ---------------------------------------------------------------- site map
 NAV = [
     ("Web Design", [("minneapolis-web-design-companies", "Web Design"),
@@ -34,6 +38,7 @@ NAV = [
                    ("minneapolis-marketing-firms", "Marketing Firm"),
                    ("minneapolis-ppc-management", "PPC Management"),
                    ("social-media-marketing-minneapolis", "Social Media Marketing")]),
+    ("Lead Generation", [(p["slug"], p["nav"]) for p in LG.PAGES]),
     ("Brand & Creative", [("advertising-companies-minneapolis", "Advertising"),
                           ("creative-agencies-minneapolis", "Creative Agency"),
                           ("branding-agency-minneapolis", "Branding")]),
@@ -65,6 +70,13 @@ LINK_PHRASES = [  # (regex, target) — earlier entries win ties
     (r"creative (?:agenc(?:y|ies)|direction|work|teams?|concepts?|production|campaigns?|strategy|assets)", "creative-agencies-minneapolis"),
     (r"brand strategy|brand identity|branding|visual identity|brand (?:positioning|voice|standards|guidelines|messaging|consistency|recognition)", "branding-agency-minneapolis"),
     (r"advertising(?: campaigns?)?", "advertising-companies-minneapolis"),
+    (r"(?:contractor |home service )?lead generation", LG.HUB),
+    (r"landscap(?:ing|ers?)(?: compan(?:y|ies)| projects?| work)?", "landscaping-lead-generation"),
+    (r"(?:irrigation|sprinkler)(?: systems?| compan(?:y|ies)| work)?", "irrigation-lead-generation"),
+    (r"snow (?:removal|plowing)(?: compan(?:y|ies)| contracts?)?", "snow-removal-lead-generation"),
+    (r"concrete (?:contractors?|work|projects?)", "concrete-contractor-lead-generation"),
+    (r"towing(?: compan(?:y|ies))?|tow trucks?", "towing-lead-generation"),
+    (r"home service contractors?|contractors", LG.HUB),
 ]
 MAX_CONTEXT_LINKS = 6
 MAX_INBOUND = 6
@@ -339,6 +351,8 @@ def plan_related(inbound):
                            key=lambda t: (load[t], SERVICES.index(t)))
         pool_other = sorted([t for t in SERVICES if CLUSTER[t] != CLUSTER[slug] and t not in inbound_from(inbound, slug)],
                             key=lambda t: (load[t], SERVICES.index(t)))
+        if slug in LG.LEADGEN_SLUGS and slug != LG.HUB:
+            pool_same = [LG.HUB] + [t for t in pool_same if t != LG.HUB]
         pick = pool_same[:2]
         pick += [t for t in pool_other if t not in pick][:4 - len(pick)]
         for t in pick:
@@ -371,7 +385,7 @@ def header(slug):
 <header class="site-header"><div class="wrap">
   <a class="logo" href="/" aria-label="{BRAND} home"><img src="/assets/1094/logo-display.webp" width="560" height="84" alt="{BRAND}"></a>
   <nav class="nav" id="primary-nav-panel" aria-label="Primary">
-    <ul class="nav-list">{"".join(groups)}<li><a class="nav-link" href="/about/"{" aria-current=\"page\"" if slug == "about" else ""}>About</a></li><li><a class="nav-link" href="/contact/"{" aria-current=\"page\"" if slug == "contact" else ""}>Contact</a></li></ul>
+    <ul class="nav-list">{"".join(groups)}<li><a class="nav-link" href="/about/"{" aria-current=\"page\"" if slug == "about" else ""}>About</a></li><li class="nav-mobile"><a class="nav-link" href="/contact/"{" aria-current=\"page\"" if slug == "contact" else ""}>Contact</a></li></ul>
   </nav>
   <a class="btn btn-call" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>{PHONE_DISPLAY}</span></a>
   <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav-panel"><span></span><span class="sr">Menu</span></button>
@@ -411,11 +425,15 @@ def crumbs(page):
     if not page["slug"]:
         return ""
     name = page.get("crumb") or SHORT.get(page["slug"], "")
-    return f'<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">{esc(name)}</li></ol></nav>'
+    mid = f'<li><a href="{url(page["parent"])}">{esc(LONG_NAME[page["parent"]])}</a></li>' if page.get("parent") else ""
+    return f'<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li>{mid}<li aria-current="page">{esc(name)}</li></ol></nav>'
 
 def r_hero(sec, page):
     chips = "".join(f"<li>{esc(c)}</li>" for c in sec["chips"])
     img = render_img(sec["img"], "(max-width: 900px) 100vw, 46vw", eager=True) if sec["img"] else ""
+    if sec.get("alerts"):
+        cards = "".join(f'''<li class="alert"><p class="alert-src">{esc(a["src"])}</p><p class="alert-job">{esc(a["job"])}</p><p class="alert-meta"><span>{esc(a["where"])}</span><span class="alert-note">{esc(a["note"])}</span></p></li>''' for a in sec["alerts"])
+        img = f'<div class="alerts"><p class="alerts-label">Example lead alerts</p><ul>{cards}</ul></div>'
     return f'''<section class="hero">
   <div class="wrap hero-grid">
     <div class="hero-copy">
@@ -429,7 +447,7 @@ def r_hero(sec, page):
       </div>
       {f'<ul class="chips" aria-label="Focus areas">{chips}</ul>' if chips else ""}
     </div>
-    <figure class="hero-media">{img}{serp_card(page)}</figure>
+    <figure class="hero-media{' hero-alerts' if sec.get('alerts') else ''}">{img}{serp_card(page)}</figure>
   </div>
 </section>'''
 
@@ -555,15 +573,21 @@ def page_ld(page, kind="WebPage"):
                                     "width": int(hero["img"]["w"]), "height": int(hero["img"]["h"]), "caption": hero["img"]["alt"]}
     if page["slug"]:
         wp["breadcrumb"] = {"@id": u + "#breadcrumb"}
-        graph.append({"@type": "BreadcrumbList", "@id": u + "#breadcrumb", "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": "Home", "item": ORIGIN + "/"},
-            {"@type": "ListItem", "position": 2, "name": page.get("crumb") or SHORT.get(page["slug"], page["title"]), "item": u}]})
+        crumbs_ld = [{"@type": "ListItem", "position": 1, "name": "Home", "item": ORIGIN + "/"}]
+        if page.get("parent"):
+            crumbs_ld.append({"@type": "ListItem", "position": 2, "name": LONG_NAME[page["parent"]], "item": absu(page["parent"])})
+        crumbs_ld.append({"@type": "ListItem", "position": len(crumbs_ld) + 1, "name": page.get("crumb") or SHORT.get(page["slug"], page["title"]), "item": u})
+        graph.append({"@type": "BreadcrumbList", "@id": u + "#breadcrumb", "itemListElement": crumbs_ld})
     graph.append(wp)
     if page["slug"] in SERVICES or page["slug"] == "":
         h1 = next(s["h1"] for s in page["sections"] if s["type"] == "hero")
         svc = {"@type": "Service", "@id": u + "#service", "name": h1, "serviceType": LONG_NAME.get(page["slug"], h1),
                "description": page["desc"], "url": u, "provider": {"@id": ORIGIN + "/#business"},
                "areaServed": {"@type": "City", "name": "Minneapolis"}}
+        if page["slug"] in LG.LEADGEN_SLUGS:
+            svc["serviceType"] = "Lead generation"
+            svc["areaServed"] = {"@type": "Country", "name": "United States"}
+            svc["audience"] = {"@type": "BusinessAudience", "audienceType": LONG_NAME[page["slug"]].replace(" Lead Generation", "") + " businesses"}
         if page["slug"] == "":
             svc["hasOfferCatalog"] = {"@type": "OfferCatalog", "name": "Website design, SEO and marketing services",
                                       "itemListElement": [{"@type": "Offer", "itemOffered": {"@type": "Service", "name": LONG_NAME[s], "url": absu(s)}} for s in SERVICES if s]}
@@ -729,7 +753,7 @@ def about_page():
             {"h": "Search Engine Optimization", "href": "/", "p": "Technical fixes, service pages and content priorities that help the right customers find you when they search."},
             {"h": "Local SEO", "href": "/local-seo-minneapolis/", "p": "Google Business Profile, map visibility and local signals for businesses that depend on nearby customers."},
             {"h": "Web Development and Custom Tools", "href": "/web-developers-minneapolis/", "p": "Our SaaS developers build the integrations and custom features a standard website template cannot handle."},
-            {"h": "Lead Acquisition Automation", "href": "", "p": "Forms, calls, ads and your CRM connected so every new lead is captured, routed to the right person and followed up automatically."},
+            {"h": "Lead Acquisition Automation", "href": "/contractor-lead-generation/", "p": "Forms, calls, ads and your CRM connected so every new lead is captured, routed to the right person and followed up automatically."},
             {"h": "PPC Management", "href": "/minneapolis-ppc-management/", "p": "Paid search for when you need leads sooner, measured against the same conversions as your organic traffic."}]},
         {"type": "prose", "kicker": "", "intro": "", "h2": "Based in Minnesota, Working With Clients Nationwide",
          "paras": ["Our office is at 530 N 3rd St in the North Loop of Minneapolis, and we know the Twin Cities market well. Most of our work happens online, so we also design websites and run search campaigns for businesses across the United States.",
@@ -759,7 +783,8 @@ LONG_NAME = {"": "Search Engine Optimization (SEO)",
              "social-media-marketing-minneapolis": "Social Media Marketing",
              "advertising-companies-minneapolis": "Advertising",
              "creative-agencies-minneapolis": "Creative Agency Services",
-             "branding-agency-minneapolis": "Branding"}
+             "branding-agency-minneapolis": "Branding",
+             **{p["slug"]: p["long"] for p in LG.PAGES}}
 SERVICE_BLURB = {}
 
 def main():
@@ -780,9 +805,16 @@ def main():
     shutil.copy(os.path.join(here, "site.css"), OUT)
     shutil.copy(os.path.join(here, "site.js"), OUT)
 
-    pages = [extract_page(s) for s in [""] + SERVICES]
+    pages = [extract_page(s) for s in [""] + SERVICES if s not in LG.LEADGEN_SLUGS]
     for p in pages:
         apply_extra_images(p)
+    for lp in LG.PAGES:
+        hero = {"type": "hero", "kicker": lp["kicker"], "h1": lp["h1"], "lead": lp["lead"], "chips": lp["chips"],
+                "img": None, "alerts": lp["alerts"]}
+        secs = [hero] + [dict({"kicker": "", "intro": "", "paras": []}, **x) for x in lp["sections"]]
+        pages.append({"slug": lp["slug"], "title": lp["title"], "desc": lp["desc"],
+                      "crumb": lp["nav"] if lp["slug"] != LG.HUB else "Contractor Lead Generation",
+                      "parent": LG.HUB if lp["slug"] != LG.HUB else None, "sections": secs})
     # homepage "About" section links to the new About page
     for sec in pages[0]["sections"]:
         if sec["type"] == "media" and sec["h2"].startswith("About"):
@@ -794,6 +826,8 @@ def main():
             for it in sec["items"]:
                 if it["href"]:
                     SERVICE_BLURB[it["href"].strip("/")] = BeautifulSoup(it["p"], "html.parser").get_text()
+    for lp in LG.PAGES:
+        SERVICE_BLURB[lp["slug"]] = lp["blurb"]
     SERVICE_BLURB[""] = "Technical SEO, content priorities, local signals and reporting that ties search visibility to real inquiries."
     # make homepage service cards use clearer names
     for sec in pages[0]["sections"]:
@@ -801,6 +835,7 @@ def main():
             for it in sec["items"]:
                 it["h"] = LONG_NAME.get(it["href"].strip("/"), it["h"])
             sec["h2"] = "Website, Search and Marketing Services"
+            sec["items"].append({"h": "Contractor Lead Generation", "href": url(LG.HUB), "p": LG.PAGES[0]["blurb"]})
 
     inbound = {}
     interlink(pages, inbound)
@@ -811,7 +846,9 @@ def main():
         body = render_sections(p)
         hero = next(s for s in p["sections"] if s["type"] == "hero")
         og_ld = page_ld(p, p.get("kind", "WebPage"))
-        og = {"src": hero["img"]["src"], "w": hero["img"]["w"], "h": hero["img"]["h"], "alt": hero["img"]["alt"]} if hero.get("img") else None
+        og = {"src": hero["img"]["src"], "w": hero["img"]["w"], "h": hero["img"]["h"], "alt": hero["img"]["alt"]} if hero.get("img") else \
+             {"src": "/assets/1094/brand/search-engine-optimization-minneapolis-field-presence.webp", "w": "900", "h": "675",
+              "alt": "Website Design & SEO Solutions branded service van at a client's home"}
         d = os.path.join(OUT, p["slug"]) if p["slug"] else OUT
         os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(document(p, body, og_ld, og))
@@ -842,6 +879,7 @@ def main():
     # llms.txt + okf: fix brand capitalisation & add contact page
     llms = fix_brand(open(os.path.join(SRC, "llms.txt"), encoding="utf-8").read())
     llms = llms.rstrip() + "\n\n## About\n\n- [About us](https://seo4web.pro/about/): Started 12 years ago by business owners who learned SEO to grow their own business; today a Minnesota team of web designers and SaaS developers serving clients nationwide.\n"
+    llms += "\n## Lead generation for home service contractors\n\n" + "".join(f"- [{p['long']}]({ORIGIN}/{p['slug']}/): {p['blurb']}\n" for p in LG.PAGES)
     open(os.path.join(OUT, "llms.txt"), "w", encoding="utf-8").write(llms)
     for f in os.listdir(os.path.join(OUT, "okf")):
         fp = os.path.join(OUT, "okf", f)
