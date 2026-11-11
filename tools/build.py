@@ -15,7 +15,7 @@ PHONE_LD = "+1-612-230-0815"
 EMAIL = "info@seo4web.pro"
 STREET, CITY, REGION, ZIP = "530 N 3rd St", "Minneapolis", "MN", "55401"
 TODAY = datetime.date.today().isoformat()
-FONTS = os.environ.get("FONTS_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "node_modules/@fontsource-variable"))
+FONTS = "/home/claude/tools/node_modules/@fontsource-variable"
 ASSET_V = TODAY.replace("-", "")
 
 # ---------------------------------------------------------------- site map
@@ -217,6 +217,39 @@ def extract_page(slug):
     page["sections"] = [extract_section(x, i == len(secs) - 1) for i, x in enumerate(secs)]
     page["main_soup"] = s.main
     return page
+
+# ---------------------------------------------------------------- extra images
+EXTRA = "/assets/1094/extra/"
+def extra_img(name, w, h, alt):
+    return {"src": f"{EXTRA}{name}.webp", "alt": alt, "w": str(w), "h": str(h),
+            "srcset": ", ".join([f"{EXTRA}{name}-w{x}.webp {x}w" for x in (400, 800, 1200)] + [f"{EXTRA}{name}.webp {w}w"])}
+
+EXTRA_IMAGES = {
+    "minneapolis-ppc-management": {
+        "Paid Search Managed Around Business Results": extra_img("minneapolis-ppc-ad-campaigns", 1600, 1066,
+            "Person tapping a smartphone surrounded by floating icons for video, display, audience and search ads"),
+        "How Our PPC Management Process Works": extra_img("minneapolis-ppc-optimization-dashboard", 1600, 1065,
+            "Hands on a laptop keyboard with campaign performance charts and percentage gauges overlaid on the screen"),
+        "Better Decisions Start With Reliable Conversion Data": extra_img("minneapolis-ppc-reporting", 1600, 1066,
+            "Printed campaign reports with bar, line and pie charts under a magnifying glass, next to a pen and data table"),
+        "How Budget Is Controlled": extra_img("minneapolis-ppc-budget-setup", 1600, 900,
+            "Marketer checking a cost report on a laptop against a printed spreadsheet while reviewing a campaign budget"),
+    },
+}
+FINAL_BG = {"": "/assets/1094/extra/minneapolis-skyline.webp"}
+
+def apply_extra_images(page):
+    cfg = EXTRA_IMAGES.get(page["slug"], {})
+    for sec in page["sections"]:
+        img = cfg.get(sec.get("h2"))
+        if not img:
+            continue
+        if sec["type"] == "prose":
+            sec["type"] = "media"
+        sec["img"] = img
+    for sec in page["sections"]:
+        if sec["type"] == "final" and page["slug"] in FINAL_BG:
+            sec["bg"] = FINAL_BG[page["slug"]]
 
 # ---------------------------------------------------------------- interlinking
 def _slots(page):
@@ -425,8 +458,9 @@ def r_cards(sec, page, alt):
     return f'<section class="sec{alt}"><div class="wrap">{head_block(sec, "wide")}<ul class="cards{many}">{"".join(items)}</ul></div></section>'
 
 def r_steps(sec, page, alt):
+    fig = f'<figure class="steps-fig">{render_img(sec["img"], "(max-width: 1020px) 100vw, 36vw")}</figure>' if sec.get("img") else ""
     items = "".join(f'<li><span class="step-n" aria-hidden="true">{it["n"]}</span><div><h3>{esc(it["h"])}</h3><p>{it["p"]}</p></div></li>' for it in sec["items"])
-    return f'<section class="sec steps-sec"><div class="wrap split">{head_block(sec)}<ol class="steps">{items}</ol></div></section>'
+    return f'<section class="sec steps-sec"><div class="wrap split"><div class="steps-side">{head_block(sec)}{fig}</div><ol class="steps">{items}</ol></div></section>'
 
 def r_faq(sec, page, alt):
     items = "".join(f'<details><summary><h3>{esc(it["q"])}</h3><span class="pm" aria-hidden="true"></span></summary><div class="ans"><p>{it["a"]}</p></div></details>' for it in sec["items"])
@@ -457,7 +491,8 @@ def r_related(page):
 
 def r_final(sec, page, alt):
     ps = "".join(f"<p>{p}</p>" for p in sec["paras"])
-    return f'''<section class="final"><div class="wrap final-in">
+    bg = f'<img class="final-bg" src="{sec["bg"]}" alt="" width="395" height="128" loading="lazy" decoding="async">' if sec.get("bg") else ""
+    return f'''<section class="final{' has-bg' if bg else ''}">{bg}<div class="wrap final-in">
   <h2>{esc(sec["h2"])}</h2>
   <div>{ps}<div class="actions">
     <a class="btn btn-primary" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>Call {PHONE_DISPLAY}</span></a>
@@ -687,6 +722,7 @@ def main():
     # static assets
     shutil.copytree(os.path.join(SRC, "assets"), os.path.join(OUT, "assets"))
     shutil.copytree(os.path.join(SRC, "okf"), os.path.join(OUT, "okf"))
+    shutil.copytree(os.path.join(os.path.dirname(os.path.abspath(__file__)), "extra-assets"), os.path.join(OUT, "assets/1094/extra"))
     for f in ("favicon.ico",):
         shutil.copy(os.path.join(SRC, f), OUT)
     os.makedirs(os.path.join(OUT, "fonts"))
@@ -698,6 +734,8 @@ def main():
     shutil.copy(os.path.join(here, "site.js"), OUT)
 
     pages = [extract_page(s) for s in [""] + SERVICES]
+    for p in pages:
+        apply_extra_images(p)
     # service blurbs from homepage "Related Services" cards
     for sec in pages[0]["sections"]:
         if sec["type"] == "cards":
