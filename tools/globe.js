@@ -5,6 +5,8 @@
   var ctx = canvas.getContext('2d');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var MODE = canvas.getAttribute('data-mode') || '404';
+  var HORIZON = canvas.getAttribute('data-layout') === 'horizon';
+  var SWAY = MODE === 'thanks' || MODE === 'contact';
   var D = Math.PI / 180;
 
   // land dots -> unit vectors
@@ -20,7 +22,7 @@
   var DESTS = [[-33.9, 18.4], [35.7, 139.7], [-41.3, 174.8], [64.1, -21.9], [-22.9, -43.2], [51.5, -0.1], [1.35, 103.8], [-34.6, -58.4], [21.3, -157.9], [60.2, 24.9], [-8.4, 115.2], [30.0, 31.2]];
   var dest = vec.apply(null, DESTS[Math.floor(Math.random() * DESTS.length)]);
 
-  var HOME_ROT = 93.27 * D + (MODE === 'thanks' ? 0.12 : -0.3), HOME_TILT = MODE === 'thanks' ? 0.55 : 0.32;
+  var HOME_ROT = 93.27 * D + (HORIZON ? 0.06 : MODE === 'thanks' ? 0.12 : -0.3), HOME_TILT = HORIZON ? -0.2 : MODE === 'thanks' ? 0.55 : 0.32;
   var rot = HOME_ROT, tilt = HOME_TILT, vr = reduce ? 0 : 0.0016, vt = 0;
   var W, H, R, cx, cy, dpr;
   function size() {
@@ -29,7 +31,9 @@
     W = r.width; H = r.height;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    R = Math.min(W, H) * 0.4; cx = W / 2; cy = H / 2;
+    if (HORIZON) { // planet rising from the bottom edge
+      R = W < 760 ? W * 1.05 : Math.min(W * 0.6, 1100); cx = W / 2; cy = H + R * 0.6;
+    } else { R = Math.min(W, H) * 0.4; cx = W / 2; cy = H / 2; }
   }
 
   // rotate world vector by current view
@@ -56,7 +60,7 @@
     ctx.clearRect(0, 0, W, H);
 
     // atmosphere glow
-    var g = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 1.45);
+    var g = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * (HORIZON ? 1.22 : 1.45));
     g.addColorStop(0, 'rgba(90,160,255,0.28)'); g.addColorStop(0.45, 'rgba(60,120,230,0.10)'); g.addColorStop(1, 'rgba(0,26,51,0)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R * 1.45, 0, 7); ctx.fill();
 
@@ -86,6 +90,7 @@
     ctx.fillStyle = hl; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
 
     if (MODE === 'thanks') { drawThanks(now); return; }
+    if (MODE === 'contact') { drawContact(now); return; }
     // flight arc Minneapolis -> missing page
     var ph = reduce ? 0.62 : ((now - t0) % cycle) / cycle;
     var grow = Math.min(1, ph / 0.55), fade = ph > 0.85 ? 1 - (ph - 0.85) / 0.15 : 1;
@@ -193,6 +198,40 @@
       ctx.fillStyle = '#001A33'; ctx.fillText(label, bx + 22, P[1] - 13);
     }
   }
+  var US = [[40.7, -74.0], [34.05, -118.25], [47.6, -122.3], [25.76, -80.19], [32.78, -96.8], [39.74, -104.99], [33.75, -84.39], [42.36, -71.06], [33.45, -112.07], [29.95, -90.07], [45.52, -122.68], [36.17, -86.78], [43.65, -79.38], [35.23, -80.84]];
+  var usVecs = US.map(function (c) { return vec(c[0], c[1]); });
+  function drawContact(now) {
+    var cyc = 8000, tt = reduce ? 5000 : now % cyc;
+    for (var i = 0; i < usVecs.length; i++) {
+      var e = tt - i * 420; if (e < 0) continue;
+      var grow = Math.min(1, e / 1300), alpha = e > 1300 ? Math.max(0, 1 - (e - 1300) / 2200) : 1;
+      if (reduce) { grow = 1; alpha = 0.75; }
+      if (alpha <= 0) continue;
+      var end = arc(MSP, usVecs[i], grow, alpha, true);
+      if (grow < 1) head(end);
+      else {
+        proj(usVecs[i][0], usVecs[i][1], usVecs[i][2], P);
+        if (P[2] > 0) {
+          var k = Math.min(1, (e - 1300) / 900);
+          ctx.strokeStyle = 'rgba(255,255,255,' + (0.7 * (1 - k)).toFixed(3) + ')'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(P[0], P[1], 3 + k * 12, 0, 7); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,' + (0.9 * alpha).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(P[0], P[1], 2.6, 0, 7); ctx.fill();
+        }
+      }
+    }
+    proj(MSP[0], MSP[1], MSP[2], P);
+    if (P[2] > 0) {
+      var pulse = reduce ? 0.5 : (now % 2000) / 2000;
+      var glow = ctx.createRadialGradient(P[0], P[1], 0, P[0], P[1], 30);
+      glow.addColorStop(0, 'rgba(255,137,0,0.6)'); glow.addColorStop(1, 'rgba(255,137,0,0)');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(P[0], P[1], 30, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,137,0,' + (0.8 * (1 - pulse)).toFixed(3) + ')'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(P[0], P[1], 5 + pulse * 22, 0, 7); ctx.stroke();
+      ctx.fillStyle = '#FF8900'; ctx.beginPath(); ctx.arc(P[0], P[1], 6, 0, 7); ctx.fill();
+      ctx.font = '700 13px "Bricolage Grotesque", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillText('Minneapolis HQ', P[0] + 12, P[1] + 20);
+    }
+  }
   function roundRect(x, y, w, h, r) {
     ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
@@ -200,7 +239,7 @@
 
   // drag to spin, with inertia
   var dragging = false, lx = 0, ly = 0;
-  canvas.addEventListener('pointerdown', function (e) { dragging = true; lx = e.clientX; ly = e.clientY; canvas.setPointerCapture(e.pointerId); canvas.classList.add('grabbing'); });
+  if (canvas.getAttribute('data-interactive') !== 'false') canvas.addEventListener('pointerdown', function (e) { dragging = true; lx = e.clientX; ly = e.clientY; canvas.setPointerCapture(e.pointerId); canvas.classList.add('grabbing'); });
   canvas.addEventListener('pointermove', function (e) {
     if (!dragging) return;
     var dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY;
@@ -215,7 +254,7 @@
   function loop(now) {
     if (!dragging) {
       rot += vr; tilt = Math.max(-0.9, Math.min(0.9, tilt + vt));
-      if (MODE === 'thanks') { // keep Minneapolis in view: gentle sway, ease back home after a drag
+      if (SWAY) { // keep Minneapolis in view: gentle sway, ease back home after a drag
         vr *= 0.94; vt *= 0.94;
         rot += (HOME_ROT + 0.22 * Math.sin(now / 3800) - rot) * 0.015;
         tilt += (HOME_TILT - tilt) * 0.015;

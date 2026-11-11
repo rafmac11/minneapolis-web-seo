@@ -672,31 +672,52 @@ def document(page, body, ld, og_img=None, robots="index, follow, max-image-previ
 # ---------------------------------------------------------------- simple pages
 def contact_page():
     page = {"slug": "contact", "crumb": "Contact", "title": "Contact Website Design & SEO Solutions | Minneapolis",
-            "desc": f"Call {PHONE_DISPLAY} or email {EMAIL} to talk about website design, SEO or digital marketing for your Minneapolis business. Office in the North Loop.",
+            "desc": f"Request a free callback or call {PHONE_DISPLAY} to talk about website design, SEO or lead generation for your business. Minneapolis office, clients nationwide.",
             "sections": []}
     svc = "".join(f'<li><a href="{url(s)}">{esc(LONG_NAME[s])}</a></li>' for s in SERVICES)
-    body = f'''<section class="hero hero-plain"><div class="wrap">
-  {crumbs(page)}
-  <h1>Talk to a Minneapolis web design and SEO team</h1>
-  <p class="lead">Tell us about your website, the services you want to be found for, and the area you serve. We will come back with an honest view of what is worth doing first.</p>
-</div></section>
-<section class="sec"><div class="wrap contact-grid">
-  <div class="contact-cards">
-    <a class="ccard ccard-main" href="tel:{PHONE_TEL}"><span class="cl">Call</span><span class="cv">{PHONE_DISPLAY}</span><span class="cn">Fastest way to reach us during business hours</span></a>
-    <a class="ccard" href="mailto:{EMAIL}?subject=Website%20%2F%20SEO%20enquiry"><span class="cl">Email</span><span class="cv">{EMAIL}</span><span class="cn">Include your website address and what you need</span></a>
-    <a class="ccard" href="https://www.google.com/maps/search/?api=1&amp;query=530+N+3rd+St+Minneapolis+MN+55401" rel="noopener" target="_blank"><span class="cl">Visit</span><span class="cv">{STREET}, {CITY}, {REGION} {ZIP}</span><span class="cn">North Loop office. Opens in Google Maps.</span></a>
+    body = f'''<section class="ct">
+  <canvas id="nf-globe" class="ct-planet" data-mode="contact" data-layout="horizon" data-interactive="false" aria-hidden="true"></canvas>
+  <div class="wrap ct-grid">
+    <div class="ct-copy">
+      {crumbs(page)}
+      <p class="ty-badge ct-badge"><span class="ct-dot" aria-hidden="true"></span>Free consultation, no obligation</p>
+      <h1>Tell us about your business. We'll show you what to fix first.</h1>
+      <p class="lead">Send a few details and someone from our Minneapolis team will get back to you with an honest view of your website, your search visibility and where your leads are slipping away.</p>
+      <ul class="ct-methods">
+        <li><a href="tel:{PHONE_TEL}"><span class="ct-ic">{ICON_PHONE}</span><span><span class="ct-l">Call</span><span class="ct-v">{PHONE_DISPLAY}</span></span></a></li>
+        <li><a href="mailto:{EMAIL}"><span class="ct-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5zm2 .9v.3l7 4.6 7-4.6v-.3zm14 2.6-6.45 4.24a1 1 0 0 1-1.1 0L5 10v7h14z" fill="currentColor"/></svg></span><span><span class="ct-l">Email</span><span class="ct-v">{EMAIL}</span></span></a></li>
+        <li><a href="https://www.google.com/maps/search/?api=1&amp;query=530+N+3rd+St+Minneapolis+MN+55401" target="_blank" rel="noopener"><span class="ct-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 5.2-7 13-7 13S5 14.2 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z" fill="currentColor"/></svg></span><span><span class="ct-l">Visit</span><span class="ct-v">{STREET}, {CITY}, {REGION} {ZIP}</span></span></a></li>
+      </ul>
+      <dl class="ct-hours"><div><dt>Monday–Friday</dt><dd>8am–6pm</dd></div><div><dt>Saturday</dt><dd>9am–2pm</dd></div><div><dt>Sunday</dt><dd>Closed</dd></div></dl>
+    </div>
+    <div class="ct-card" id="form">
+      <h2>Request a free callback</h2>
+      <p class="ct-card-sub">It takes about a minute. We reply during business hours.</p>
+      <div class="crm-wrap">
+        <div data-crm-form="bf71a7aa-af51-400d-98fc-b164d372927d" data-form-id="main"></div>
+        <p class="form-fallback">Loading the form. If it does not appear, call <a href="tel:{PHONE_TEL}">{PHONE_DISPLAY}</a> or email <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
+      </div>
+      <p class="ct-privacy">We only use your details to reply to your request. See our <a href="/privacy-policy/">Privacy Policy</a>.</p>
+    </div>
   </div>
-  <div class="contact-side">
-    <h2>Hours</h2>
-    <table class="hours"><tr><th scope="row">Monday–Friday</th><td>8am–6pm</td></tr><tr><th scope="row">Saturday</th><td>9am–2pm</td></tr><tr><th scope="row">Sunday</th><td>Closed</td></tr></table>
-    <h2>What helps us prepare</h2>
-    <ul class="ticks"><li>Your website address</li><li>Your main services and the areas you serve</li><li>What is not working today, and any reports you already have</li></ul>
+</section>
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head wide"><h2>What Happens After You Send It</h2><p class="dek">Three short steps, no pressure.</p></div>
+    <ol class="ty-steps">
+      <li><span class="ty-n">1</span><h3>We review your request</h3><p>We look at your website, your services and the area you serve before we reach out, so the first conversation is useful.</p></li>
+      <li><span class="ty-n">2</span><h3>A short call</h3><p>We ask what is working, what is not and which jobs or customers you want more of.</p></li>
+      <li><span class="ty-n">3</span><h3>A clear plan and price</h3><p>You get an honest recommendation of what to do first, what it costs and how you will see whether it worked.</p></li>
+    </ol>
   </div>
-</div></section>
+</section>
 <section class="sec alt"><div class="wrap">
-  <div class="sec-head wide"><h2>Services we can talk through</h2><p class="dek">Serving Minneapolis, Minnesota and the surrounding Twin Cities metro.</p></div>
+  <div class="sec-head wide"><h2>Services We Can Talk Through</h2><p class="dek">Based in Minneapolis, Minnesota, working with businesses nationwide.</p></div>
   <ul class="svc-list">{svc}</ul>
-</div></section>'''
+</div></section>
+<script src="https://crm.webleadsnow.com/embed/form.js" async></script>
+<script src="/assets/globe/globe-points.js?v={GLOBE_V}" defer></script>
+<script src="/assets/globe/globe.js?v={GLOBE_V}" defer></script>'''
     return page, body
 
 def legal_page(slug):
