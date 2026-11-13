@@ -26,6 +26,8 @@ def _hash(*names):
 CSS_V = _hash("site.css")
 JS_V = _hash("site.js")
 GLOBE_V = _hash("globe.js", "globe-points.js")
+PROC_V = _hash("process3d.js")
+PROC_TAG = f'\n<script src="/assets/process3d.js?v={PROC_V}" defer></script>'
 
 import importlib.util as _ilu
 _spec = _ilu.spec_from_file_location("leadgen_content", os.path.join(os.path.dirname(os.path.abspath(__file__)), "leadgen_content.py"))
@@ -486,8 +488,39 @@ def r_cards(sec, page, alt):
     many = " cards-many" if len(items) > 8 else ""
     return f'<section class="sec{alt}"><div class="wrap">{head_block(sec, "wide")}<ul class="cards{many}">{"".join(items)}</ul></div></section>'
 
+ICON_RULES = [  # first match wins
+    (("review requested", "job done", "finished work"), "star"),
+    (("repeat", "remember", "renew", "next season", "ongoing care"), "repeat"),
+    (("measur", "report", "baseline", "track"), "chart"),
+    (("booked", "estimate", "schedul"), "calendar"),
+    (("reply", "response", "answer", "texted"), "message"),
+    (("rout", "checked against", "dispatch", "local presence", "local authority", "markets and"), "pin"),
+    (("calls", "phone"), "phone"),
+    (("request", "submit", "brief", "comes in"), "form"),
+    (("team", "friends", "owners", "audience", "training"), "users"),
+    (("launch", "publishing", "delivery", "handoff"), "rocket"),
+    (("quality", "testing", "validation"), "shield"),
+    (("wirefram", "sitemap", "structure", "architecture", "interface", "scope", "content plan"), "layout"),
+    (("rank", "grow"), "trend"),
+    (("optimi", "refin", "improv"), "bolt"),
+    (("design", "creative", "concept", "production", "content development"), "pen"),
+    (("develop",), "code"),
+    (("priorit", "goal", "define", "strategy", "set priorities"), "target"),
+    (("discover", "audit", "research", "review", "map "), "search"),
+    (("implement", "fix", "build", "connect"), "tool"),
+]
+def step_icon(h):
+    h = h.lower()
+    for words, key in ICON_RULES:
+        if any(w in h for w in words):
+            return key
+    return "check"
+
 def r_steps(sec, page, alt):
     fig = f'<figure class="steps-fig">{render_img(sec["img"], "(max-width: 1020px) 100vw, 36vw")}</figure>' if sec.get("img") else ""
+    if not fig:
+        keys = ",".join(step_icon(it["h"]) for it in sec["items"])
+        fig = f'<div class="proc3d"><canvas data-icons="{keys}" role="img" aria-label="Animated 3D diagram of the {len(sec["items"])} steps: ' + esc("; ".join(it["h"] for it in sec["items"])) + '"></canvas><p class="proc3d-hint" aria-hidden="true"><span class="h-hover">Hover a step to jump to it</span><span class="h-tap">Tap a step to jump to it</span></p></div>'
     items = "".join(f'<li><span class="step-n" aria-hidden="true">{it["n"]}</span><div><h3>{esc(it["h"])}</h3><p>{it["p"]}</p></div></li>' for it in sec["items"])
     return f'<section class="sec steps-sec"><div class="wrap split"><div class="steps-side">{head_block(sec)}{fig}</div><ol class="steps{' timeline' if sec.get('timeline') else ''}">{items}</ol></div></section>'
 
@@ -663,7 +696,7 @@ def document(page, body, ld, og_img=None, robots="index, follow, max-image-previ
 {body}
 </main>
 {footer()}
-<script src="/site.js?v={JS_V}" defer></script>
+<script src="/site.js?v={JS_V}" defer></script>{PROC_TAG if 'class="proc3d"' in body else ''}
 </body>
 </html>
 '''
@@ -909,6 +942,7 @@ def main():
     shutil.copy(os.path.join(here, "site.js"), OUT)
     os.makedirs(os.path.join(OUT, "assets/globe"), exist_ok=True)
     shutil.copy(os.path.join(here, "globe.js"), os.path.join(OUT, "assets/globe/globe.js"))
+    shutil.copy(os.path.join(here, "process3d.js"), os.path.join(OUT, "assets/process3d.js"))
     shutil.copy(os.path.join(here, "globe-points.js"), os.path.join(OUT, "assets/globe/globe-points.js"))
 
     pages = [extract_page(s) for s in [""] + SERVICES if s not in LG.LEADGEN_SLUGS]
