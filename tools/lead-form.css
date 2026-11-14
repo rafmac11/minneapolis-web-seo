@@ -1,0 +1,13 @@
+.lead-form{display:grid;gap:.9rem}
+.lead-form .lf-row{display:grid;gap:.9rem;grid-template-columns:1fr 1fr}
+@media (max-width:560px){.lead-form .lf-row{grid-template-columns:1fr}}
+.lead-form label{display:grid;gap:.35rem;font:600 .9rem/1.2 var(--display);color:var(--ink)}
+.lead-form label .lf-opt{font-weight:400;color:var(--steel)}
+.lead-form input,.lead-form select,.lead-form textarea{width:100%;box-sizing:border-box;font:inherit;font-size:1rem;font-weight:400;line-height:1.4;color:var(--ink);background:#fff;border:1px solid var(--rule);border-radius:8px;padding:.75rem .85rem;transition:border-color .15s,box-shadow .15s}
+.lead-form textarea{min-height:110px;resize:vertical}
+.lead-form input:focus,.lead-form select:focus,.lead-form textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,140,0,.2)}
+.lead-form .lf-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.lead-form button{justify-content:center;width:100%;cursor:pointer}
+.lead-form button[disabled]{opacity:.6;cursor:wait}
+.lf-status{min-height:1.2em;margin:0;font-size:.95rem;color:var(--steel)}
+.lf-status.is-error{color:#b42318}
