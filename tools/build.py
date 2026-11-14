@@ -27,6 +27,7 @@ CSS_V = _hash("site.css")
 JS_V = _hash("site.js")
 GLOBE_V = _hash("globe.js", "globe-points.js")
 PROC_V = _hash("process3d.js")
+FORM_V = _hash("lead-form.css", "lead-form.js")
 PROC_TAG = f'\n<script src="/assets/process3d.js?v={PROC_V}" defer></script>'
 
 import importlib.util as _ilu
@@ -726,8 +727,25 @@ def contact_page():
       <h2>Request a free callback</h2>
       <p class="ct-card-sub">It takes about a minute. We reply during business hours.</p>
       <div class="crm-wrap">
-        <div data-crm-form="bf71a7aa-af51-400d-98fc-b164d372927d" data-form-id="main"></div>
-        <p class="form-fallback">Loading the form. If it does not appear, call <a href="tel:{PHONE_TEL}">{PHONE_DISPLAY}</a> or email <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
+        <form id="lead-form" class="lead-form" action="https://crm.webleadsnow.com/api/quote/?form_key=bf71a7aa-af51-400d-98fc-b164d372927d" method="post" novalidate>
+          <div class="lf-row">
+            <label><span>Name</span><input name="name" type="text" autocomplete="name" required></label>
+            <label><span>Phone</span><input name="phone" type="tel" autocomplete="tel" required></label>
+          </div>
+          <div class="lf-row">
+            <label><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
+            <label><span>Company <span class="lf-opt">(optional)</span></span><input name="company" type="text" autocomplete="organization"></label>
+          </div>
+          <div class="lf-row">
+            <label><span>Website <span class="lf-opt">(optional)</span></span><input name="website" type="text" inputmode="url" placeholder="yourbusiness.com"></label>
+            <label><span>What do you need?</span><select name="service" required><option value="">Choose one</option><option>Website design</option><option>Web development</option><option>SEO</option><option>Local SEO</option><option>PPC management</option><option>Social media marketing</option><option>Lead generation</option><option>Branding / graphic design</option><option>Something else</option></select></label>
+          </div>
+          <label><span>Anything else? <span class="lf-opt">(optional)</span></span><textarea name="message" rows="4"></textarea></label>
+          <div class="lf-hp" aria-hidden="true"><label><span>Leave blank</span><input name="website_url" type="text" tabindex="-1" autocomplete="off"></label></div>
+          <button type="submit" class="btn btn-primary">Request my free callback</button>
+          <p class="lf-status" role="status" aria-live="polite"></p>
+        </form>
+        <noscript><p class="form-fallback">Please enable JavaScript to send the form, or call <a href="tel:{PHONE_TEL}">{PHONE_DISPLAY}</a>.</p></noscript>
       </div>
       <p class="ct-privacy">We only use your details to reply to your request. See our <a href="/privacy-policy/">Privacy Policy</a>.</p>
     </div>
@@ -747,7 +765,8 @@ def contact_page():
   <div class="sec-head wide"><h2>Services We Can Talk Through</h2><p class="dek">Based in Minneapolis, Minnesota, working with businesses nationwide.</p></div>
   <ul class="svc-list">{svc}</ul>
 </div></section>
-<script src="https://crm.webleadsnow.com/embed/form.js" async></script>
+<link rel="stylesheet" href="/assets/lead-form.css?v={FORM_V}">
+<script src="/assets/lead-form.js?v={FORM_V}" defer></script>
 <script src="/assets/globe/globe-points.js?v={GLOBE_V}" defer></script>
 <script src="/assets/globe/globe.js?v={GLOBE_V}" defer></script>'''
     return page, body
@@ -943,6 +962,8 @@ def main():
     os.makedirs(os.path.join(OUT, "assets/globe"), exist_ok=True)
     shutil.copy(os.path.join(here, "globe.js"), os.path.join(OUT, "assets/globe/globe.js"))
     shutil.copy(os.path.join(here, "process3d.js"), os.path.join(OUT, "assets/process3d.js"))
+    shutil.copy(os.path.join(here, "lead-form.js"), os.path.join(OUT, "assets/lead-form.js"))
+    shutil.copy(os.path.join(here, "lead-form.css"), os.path.join(OUT, "assets/lead-form.css"))
     shutil.copy(os.path.join(here, "globe-points.js"), os.path.join(OUT, "assets/globe/globe-points.js"))
 
     pages = [extract_page(s) for s in [""] + SERVICES if s not in LG.LEADGEN_SLUGS]
