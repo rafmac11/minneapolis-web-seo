@@ -400,7 +400,7 @@ def header(slug):
   <nav class="nav" id="primary-nav-panel" aria-label="Primary">
     <ul class="nav-list">{"".join(groups)}<li><a class="nav-link" href="/about/"{" aria-current=\"page\"" if slug == "about" else ""}>About</a></li><li><a class="nav-link" href="/contact/"{" aria-current=\"page\"" if slug == "contact" else ""}>Contact</a></li></ul>
   </nav>
-  <a class="btn btn-call" href="tel:{PHONE_TEL}">{ICON_PHONE}<span>{PHONE_DISPLAY}</span></a>
+  <a class="btn btn-call" href="tel:{PHONE_TEL}" aria-label="Call {PHONE_DISPLAY}">{ICON_PHONE}<span>{PHONE_DISPLAY}</span></a>
   <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav-panel"><span></span><span class="sr">Menu</span></button>
 </div></header>'''
 
@@ -1055,6 +1055,8 @@ def main():
     # SEO overrides (titles/descriptions, scope bands, e-mail obfuscation guard, schema tweaks)
     import subprocess
     subprocess.run([sys.executable, "-I", os.path.join(here, "seo_fix.py"), OUT], check=True)
+    # AI-agent readiness: llms.txt, /.well-known/ard.json, site-data.json, credit banner, footer links
+    subprocess.run([sys.executable, "-I", os.path.join(here, "agent_ready.py"), OUT], check=True)
     # report
     print("Inbound links per service page (contextual + related block):")
     for s in SERVICES:

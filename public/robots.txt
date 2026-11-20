@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://seo4web.pro/sitemap.xml
+Agentmap: https://seo4web.pro/.well-known/ard.json
 
 # Plain-text guide for AI assistants: https://seo4web.pro/llms.txt

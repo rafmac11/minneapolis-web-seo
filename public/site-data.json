@@ -1,0 +1,230 @@
+{
+ "business": {
+  "name": "Website Design & SEO Solutions",
+  "url": "https://seo4web.pro/",
+  "description": "Website design, search engine optimization and digital marketing for Minneapolis businesses.",
+  "address": "530 N 3rd St, Minneapolis, MN 55401",
+  "telephone": "(612) 230-0815",
+  "email": "info@seo4web.pro",
+  "hours": [
+   "Mon–Fri 08:00–18:00",
+   "Sat–Sun closed"
+  ],
+  "areaServed": [
+   "Minneapolis",
+   "Minneapolis–Saint Paul metropolitan area",
+   "United States"
+  ],
+  "pricingPolicy": "Priced by project scope. After a free, no-obligation consultation and a short call you get a recommendation of what to do first and what it costs.",
+  "contactPage": "https://seo4web.pro/contact/#form"
+ },
+ "services": [
+  {
+   "slug": "minneapolis-web-design-companies",
+   "name": "Website Design",
+   "category": "Web Design",
+   "url": "https://seo4web.pro/minneapolis-web-design-companies/",
+   "title": "Minneapolis Web Design Companies for Custom Websites",
+   "description": "Minneapolis web design companies create custom websites that attract customers. Partner with skilled designers for strategic SEO and lasting growth.",
+   "keywords": "Web design; Responsive web design; User experience design; User interface design; Content management system; Landing page; Search engine optimization; Responsive design; Search-ready structure; Defined launch criteria"
+  },
+  {
+   "slug": "web-developers-minneapolis",
+   "name": "Web Development",
+   "category": "Web Design",
+   "url": "https://seo4web.pro/web-developers-minneapolis/",
+   "title": "Web Developers Minneapolis | Website Development Experts",
+   "description": "Web developers Minneapolis businesses trust create high-performing website solutions with strategic development, responsive design, and SEO expertise.",
+   "keywords": "Web development; Responsive web design; Content management system; WordPress; User experience design; Customer relationship management; Web analytics; Responsive layouts; Accessible interactions; Search-ready structure"
+  },
+  {
+   "slug": "wordpress-design-minneapolis",
+   "name": "WordPress Design",
+   "category": "Web Design",
+   "url": "https://seo4web.pro/wordpress-design-minneapolis/",
+   "title": "WordPress Design Minneapolis | Custom Business Websites",
+   "description": "WordPress design in Minneapolis creates a fast, polished website built for your brand, customers, and search visibility. Request a custom quote today.",
+   "keywords": "WordPress; Content management system; Web design; Responsive web design; Search engine optimization; Responsive layouts; Practical editing; Performance planning"
+  },
+  {
+   "slug": "design-agency-minneapolis",
+   "name": "Design Agency Services",
+   "category": "Web Design",
+   "url": "https://seo4web.pro/design-agency-minneapolis/",
+   "title": "Design Agency Minneapolis | Websites Built to Perform",
+   "description": "Our design agency in Minneapolis creates high-performing websites with strategic SEO, helping ambitious companies attract traffic, leads, and sales.",
+   "keywords": "Web design; Graphic design; User experience design; User interface design; Corporate identity; Brand; Strategy led; Search aware; Responsive design"
+  },
+  {
+   "slug": "graphic-design-firm-minneapolis",
+   "name": "Graphic Design",
+   "category": "Web Design",
+   "url": "https://seo4web.pro/graphic-design-firm-minneapolis/",
+   "title": "Graphic Design Firm Minneapolis | Creative Designers",
+   "description": "Our graphic design firm in Minneapolis creates logos, visual identities and marketing graphics, with the process, typical costs and timelines explained.",
+   "keywords": "Graphic design; Logo; Corporate identity; Visual brand language; Brand; Clear strategy; Print and digital; Production-ready files"
+  },
+  {
+   "slug": "",
+   "name": "SEO Services",
+   "category": "SEO",
+   "url": "https://seo4web.pro/",
+   "title": "Search Engine Optimization Minneapolis | SEO Services",
+   "description": "Search engine optimization Minneapolis services help local companies gain visibility, attract qualified traffic, and grow with a proven SEO agency.",
+   "keywords": "Search engine optimization; Local search engine optimization; Keyword research; Search engine marketing; Web design; Digital marketing; Web analytics; Lead generation; Search intent focused; Technical review; Measured priorities"
+  },
+  {
+   "slug": "minneapolis-seo-consultant",
+   "name": "SEO Consulting",
+   "category": "SEO",
+   "url": "https://seo4web.pro/minneapolis-seo-consultant/",
+   "title": "Minneapolis SEO Consultant for Sustainable Online Growth",
+   "description": "A Minneapolis SEO consultant delivering strategic website optimization, stronger rankings, and qualified traffic to help your business grow online.",
+   "keywords": "Search engine optimization; Keyword research; Web analytics; Google Analytics; Local search engine optimization; Search engine marketing; Technical health; Useful content; Qualified traffic"
+  },
+  {
+   "slug": "local-seo-minneapolis",
+   "name": "Local SEO",
+   "category": "SEO",
+   "url": "https://seo4web.pro/local-seo-minneapolis/",
+   "title": "Local SEO Minneapolis Services That Drive More Leads",
+   "description": "Local SEO Minneapolis services improve search visibility, attract nearby customers, and generate qualified leads with tailored strategies for lasting growth.",
+   "keywords": "Local search engine optimization; Search engine optimization; Location search optimization; Keyword research; Web analytics; Landing page; Local rankings; Maps visibility; Lead quality"
+  },
+  {
+   "slug": "digital-marketing-minneapolis-mn",
+   "name": "Digital Marketing",
+   "category": "Marketing",
+   "url": "https://seo4web.pro/digital-marketing-minneapolis-mn/",
+   "title": "Digital Marketing Minneapolis MN | Services, Process & Cost",
+   "description": "Digital marketing services for Minneapolis, MN businesses: what is included, how the process works, typical monthly costs and how to choose an agency.",
+   "keywords": "Digital marketing; Online advertising; Search engine optimization; Search engine marketing; Social media marketing; Content marketing; Marketing automation; Web analytics; Search strategy; Conversion planning; Practical reporting"
+  },
+  {
+   "slug": "marketing-minneapolis",
+   "name": "Marketing Services",
+   "category": "Marketing",
+   "url": "https://seo4web.pro/marketing-minneapolis/",
+   "title": "Marketing Minneapolis | Strategy, Planning & Measurement",
+   "description": "Marketing strategy for Minneapolis businesses: what the plan should cover, how it is managed, and how each activity is measured against business results.",
+   "keywords": "Marketing; Marketing strategy; Digital marketing; Advertising campaign; Content marketing; Brand management; Local search visibility; Clear positioning; Measured conversions"
+  },
+  {
+   "slug": "online-marketing-minneapolis",
+   "name": "Online Marketing",
+   "category": "Marketing",
+   "url": "https://seo4web.pro/online-marketing-minneapolis/",
+   "title": "Online Marketing Minneapolis | SEO, Content & Paid Media",
+   "description": "Online marketing for Minneapolis businesses that coordinates search, content and paid media, with reporting that shows what drives inquiries.",
+   "keywords": "Online advertising; Digital marketing; Content marketing; Search engine marketing; Social media marketing; Conversion marketing; Search visibility; Local discovery; Qualified inquiries"
+  },
+  {
+   "slug": "minneapolis-marketing-firms",
+   "name": "Full-Service Marketing Firm",
+   "category": "Marketing",
+   "url": "https://seo4web.pro/minneapolis-marketing-firms/",
+   "title": "Minneapolis Marketing Firm | Full-Service Programs",
+   "description": "A full-service Minneapolis marketing firm that coordinates strategy, search, content and campaigns, plus how to compare firms and proposals.",
+   "keywords": "Marketing; Marketing strategy; Advertising; Digital marketing; Brand management; Web design; Goal focused; Sound measurement; Local context"
+  },
+  {
+   "slug": "minneapolis-ppc-management",
+   "name": "PPC Management",
+   "category": "Marketing",
+   "url": "https://seo4web.pro/minneapolis-ppc-management/",
+   "title": "Minneapolis PPC Management Agency for Stronger ROI",
+   "description": "Minneapolis PPC management that reaches qualified prospects, cuts wasted spend and improves ROI, with budget control and reliable conversion data.",
+   "keywords": "Pay-per-click; Google Ads; Search engine marketing; Online advertising; Landing page; Conversion marketing; Google Analytics; Qualified conversions; Search intent focused; Clear campaign data"
+  },
+  {
+   "slug": "social-media-marketing-minneapolis",
+   "name": "Social Media Marketing",
+   "category": "Marketing",
+   "url": "https://seo4web.pro/social-media-marketing-minneapolis/",
+   "title": "Social Media Marketing Minneapolis | Growth Strategies",
+   "description": "Social media marketing Minneapolis businesses trust to build visibility, engage customers, and drive measurable growth with tailored campaigns.",
+   "keywords": "Social media marketing; Online advertising; Content marketing; Influencer marketing; Digital marketing; Audience focused; Goal driven; Measured campaigns"
+  },
+  {
+   "slug": "contractor-lead-generation",
+   "name": "Contractor Lead Generation",
+   "category": "Lead Generation",
+   "url": "https://seo4web.pro/contractor-lead-generation/",
+   "title": "Contractor Lead Generation for Home Service Businesses",
+   "description": "Lead generation for landscapers, irrigation, snow removal, concrete and towing companies: websites, local SEO, ads and automated follow-up that books jobs.",
+   "keywords": "Lead generation; Lead management; Marketing automation; Customer relationship management; Local search engine optimization; Pay-per-click; Landing page; Web design; Booked jobs, not clicks; Every lead answered; Minnesota based, nationwide"
+  },
+  {
+   "slug": "landscaping-lead-generation",
+   "name": "Landscaping Lead Generation",
+   "category": "Lead Generation",
+   "url": "https://seo4web.pro/landscaping-lead-generation/",
+   "title": "Lead Generation for Landscapers and Lawn Care Companies",
+   "description": "Landscaping lead generation for the jobs you want: design-build, hardscape and maintenance leads from search, maps and ads, followed up automatically.",
+   "keywords": "Lead generation; Landscaping; Hardscape; Landscape maintenance; Lawn; Local search engine optimization; Seasonal campaigns; Bigger projects; Maintenance contracts"
+  },
+  {
+   "slug": "irrigation-lead-generation",
+   "name": "Irrigation and Sprinkler Lead Generation",
+   "category": "Lead Generation",
+   "url": "https://seo4web.pro/irrigation-lead-generation/",
+   "title": "Irrigation and Sprinkler Company Lead Generation",
+   "description": "Lead generation for irrigation and sprinkler companies: installs, repairs, startups and winterizations from search and maps, plus automated reminders.",
+   "keywords": "Lead generation; Irrigation sprinkler; Irrigation controller; Landscape maintenance; Local search engine optimization; Marketing automation; Install and repair leads; Startup and blowout season; Repeat service"
+  },
+  {
+   "slug": "snow-removal-lead-generation",
+   "name": "Snow Removal Lead Generation",
+   "category": "Lead Generation",
+   "url": "https://seo4web.pro/snow-removal-lead-generation/",
+   "title": "Snow Removal Lead Generation for Plowing Contractors",
+   "description": "Snow removal lead generation: residential and commercial plowing contracts signed before winter, plus storm-day calls captured automatically.",
+   "keywords": "Lead generation; Snow removal; Snowplow; De-icing; Road salt; Local search engine optimization; Contracts before winter; Storm-day calls; Route density"
+  },
+  {
+   "slug": "concrete-contractor-lead-generation",
+   "name": "Concrete Contractor Lead Generation",
+   "category": "Lead Generation",
+   "url": "https://seo4web.pro/concrete-contractor-lead-generation/",
+   "title": "Concrete Contractor Lead Generation and Marketing",
+   "description": "Concrete contractor lead generation: driveway, patio, foundation and decorative leads from search and maps, qualified by project size before you quote.",
+   "keywords": "Lead generation; Concrete; Stamped concrete; Decorative concrete; Patio; Local search engine optimization; Higher-value projects; Qualified estimates; Pour-season planning"
+  },
+  {
+   "slug": "towing-lead-generation",
+   "name": "Towing Company Lead Generation",
+   "category": "Lead Generation",
+   "url": "https://seo4web.pro/towing-lead-generation/",
+   "title": "Towing Company Lead Generation and Marketing",
+   "description": "Towing lead generation: show up first for urgent tow truck searches, answer every call with missed-call text back, and track which calls become paid tows.",
+   "keywords": "Lead generation; Towing; Tow truck; Vehicle recovery; Local search engine optimization; Pay-per-click; Phone-first visibility; No missed calls; Private-pay calls"
+  },
+  {
+   "slug": "advertising-companies-minneapolis",
+   "name": "Advertising",
+   "category": "Creative",
+   "url": "https://seo4web.pro/advertising-companies-minneapolis/",
+   "title": "Advertising Companies in Minneapolis | Campaigns & Creative",
+   "description": "Advertising for Minneapolis businesses that aligns campaign strategy, creative and measurement, plus the questions to ask before you hire an ad agency.",
+   "keywords": "Advertising; Advertising campaign; Online advertising; Pay-per-click; Copywriting; Art director; Audience focused; Coordinated creative; Performance measurement"
+  },
+  {
+   "slug": "creative-agencies-minneapolis",
+   "name": "Creative Agency Services",
+   "category": "Creative",
+   "url": "https://seo4web.pro/creative-agencies-minneapolis/",
+   "title": "Creative Agencies Minneapolis | Brand, Campaign & Content",
+   "description": "Creative agency work for Minneapolis businesses: brand, campaign and content production scoped around clear goals, from brief to launch.",
+   "keywords": "Advertising campaign; Creative director; Art director; Copywriting; Graphic design; Brand; Strategy led; Audience focused; Measured work"
+  },
+  {
+   "slug": "branding-agency-minneapolis",
+   "name": "Branding",
+   "category": "Creative",
+   "url": "https://seo4web.pro/branding-agency-minneapolis/",
+   "title": "Branding Agency Minneapolis | Positioning & Identity",
+   "description": "Our Minneapolis branding agency builds brand positioning, identity systems and guidelines, and helps you choose between a refresh and a full rebrand.",
+   "keywords": "Brand; Brand management; Corporate identity; Logo; Visual brand language; Branding agency; Strategy led; Consistent identity; Practical guidelines"
+  }
+ ]
+}

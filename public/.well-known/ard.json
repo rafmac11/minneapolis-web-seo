@@ -1,0 +1,49 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Website Design & SEO Solutions",
+    "documentationUrl": "https://seo4web.pro/llms.txt"
+  },
+  "entries": [
+    {
+      "@context": "https://agenticresourcediscovery.org/context/v1",
+      "identifier": "urn:air:seo4web.pro:website:seo4web",
+      "displayName": "Website Design & SEO Solutions",
+      "description": "Website of Website Design & SEO Solutions, a Minneapolis, MN agency for website design, SEO, local SEO, PPC, social media, branding and contractor lead generation. In-page WebMCP tools let a browser agent search the services, read business details and open the callback form.",
+      "type": "text/html",
+      "url": "https://seo4web.pro/",
+      "capabilities": [
+        "search_services",
+        "get_business_info",
+        "request_quote"
+      ],
+      "representativeQueries": [
+        "website design company in Minneapolis",
+        "SEO services in Minneapolis",
+        "local SEO agency in Minneapolis",
+        "PPC management in Minneapolis",
+        "lead generation for home service contractors in Minneapolis"
+      ],
+      "tags": [
+        "website-design",
+        "seo",
+        "local-seo",
+        "ppc",
+        "digital-marketing",
+        "lead-generation",
+        "minneapolis",
+        "local-business"
+      ],
+      "updatedAt": "2026-11-20T00:00:00Z",
+      "metadata": {
+        "schemaOrgType": "ProfessionalService",
+        "address": "530 N 3rd St, Minneapolis, MN 55401, US",
+        "telephone": "+1-612-230-0815",
+        "email": "info@seo4web.pro",
+        "areaServed": "Minneapolis; Minneapolis–Saint Paul metropolitan area; United States",
+        "openingHours": "Mo-Fr 08:00-18:00",
+        "pricingPolicy": "Priced by project scope. After a free, no-obligation consultation and a short call you get a recommendation of what to do first and what it costs."
+      }
+    }
+  ]
+}
