@@ -1,40 +1,54 @@
 # Website Design & SEO Solutions
 
-> Website Design & SEO Solutions is the official website for Website Design and SEO in Minneapolis, Minnesota. It has 17 pages covering the services offered.
+> Website Design & SEO Solutions is a Minneapolis, Minnesota agency for website design, web development, search engine optimization (SEO), local SEO, PPC, social media, branding and lead generation for home service contractors. Office: 530 N 3rd St, Minneapolis, MN 55401. Phone (612) 230-0815, email info@seo4web.pro. Serves Minneapolis, the Twin Cities metro and clients nationwide.
 
-## Pages
+## Key facts
 
-- [Search Engine Optimization Minneapolis | SEO Services](https://seo4web.pro/): Search engine optimization Minneapolis services help local companies gain visibility, attract qualified traffic, and grow with a proven SEO agency.
-- [Advertising Companies in Minneapolis | Campaigns & Creative](https://seo4web.pro/advertising-companies-minneapolis/): Advertising for Minneapolis businesses that aligns campaign strategy, creative and measurement, plus the questions to ask before you hire an ad agency.
-- [Minneapolis Web Design Companies for Custom Websites](https://seo4web.pro/minneapolis-web-design-companies/): Minneapolis web design companies create custom websites that attract customers. Partner with skilled designers for strategic SEO and lasting growth.
-- [Digital Marketing Minneapolis MN | Services, Process & Cost](https://seo4web.pro/digital-marketing-minneapolis-mn/): Digital marketing services for Minneapolis, MN businesses: what is included, how the process works, typical monthly costs and how to choose an agency.
-- [Minneapolis Marketing Firm | Full-Service Programs](https://seo4web.pro/minneapolis-marketing-firms/): A full-service Minneapolis marketing firm that coordinates strategy, search, content and campaigns, plus how to compare firms and proposals.
-- [Web Developers Minneapolis | Website Development Experts](https://seo4web.pro/web-developers-minneapolis/): Web developers Minneapolis businesses trust create high-performing website solutions with strategic development, responsive design, and SEO expertise.
-- [Marketing Minneapolis | Strategy, Planning & Measurement](https://seo4web.pro/marketing-minneapolis/): Marketing strategy for Minneapolis businesses: what the plan should cover, how it is managed, and how each activity is measured against business results.
-- [Design Agency Minneapolis | Websites Built to Perform](https://seo4web.pro/design-agency-minneapolis/): Our design agency in Minneapolis creates high-performing websites with strategic SEO, helping ambitious companies attract traffic, leads, and sales.
-- [Minneapolis SEO Consultant for Sustainable Online Growth](https://seo4web.pro/minneapolis-seo-consultant/): A Minneapolis SEO consultant delivering strategic website optimization, stronger rankings, and qualified traffic to help your business grow online.
-- [Graphic Design Firm Minneapolis | Creative Designers](https://seo4web.pro/graphic-design-firm-minneapolis/): Our graphic design firm in Minneapolis creates logos, visual identities and marketing graphics, with the process, typical costs and timelines explained.
-- [Minneapolis PPC Management Agency for Stronger ROI](https://seo4web.pro/minneapolis-ppc-management/): Minneapolis PPC management that reaches qualified prospects, cuts wasted spend and improves ROI, with budget control and reliable conversion data.
-- [Social Media Marketing Minneapolis | Growth Strategies](https://seo4web.pro/social-media-marketing-minneapolis/): Social media marketing Minneapolis businesses trust to build visibility, engage customers, and drive measurable growth with tailored campaigns.
-- [Creative Agencies Minneapolis | Brand, Campaign & Content](https://seo4web.pro/creative-agencies-minneapolis/): Creative agency work for Minneapolis businesses: brand, campaign and content production scoped around clear goals, from brief to launch.
-- [Online Marketing Minneapolis | SEO, Content & Paid Media](https://seo4web.pro/online-marketing-minneapolis/): Online marketing for Minneapolis businesses that coordinates search, content and paid media, with reporting that shows what drives inquiries.
-- [Branding Agency Minneapolis | Positioning & Identity](https://seo4web.pro/branding-agency-minneapolis/): Our Minneapolis branding agency builds brand positioning, identity systems and guidelines, and helps you choose between a refresh and a full rebrand.
-- [Local SEO Minneapolis Services That Drive More Leads](https://seo4web.pro/local-seo-minneapolis/): Local SEO Minneapolis services improve search visibility, attract nearby customers, and generate qualified leads with tailored strategies for lasting growth.
-- [WordPress Design Minneapolis | Custom Business Websites](https://seo4web.pro/wordpress-design-minneapolis/): WordPress design in Minneapolis creates a fast, polished website built for your brand, customers, and search visibility. Request a custom quote today.
+- Address: 530 N 3rd St, Minneapolis, MN 55401
+- Phone: (612) 230-0815
+- Email: info@seo4web.pro
+- Hours: Mon–Fri 08:00–18:00; Sat–Sun closed
+- Service area: Minneapolis, Minneapolis–Saint Paul metropolitan area, United States
+- Pricing: Priced by project scope. After a free, no-obligation consultation and a short call you get a recommendation of what to do first and what it costs.
+- Request a callback: https://seo4web.pro/contact/#form
 
-## Structured knowledge
+## Main pages
 
-- [Open Knowledge Format bundle](https://seo4web.pro/okf/index.md): machine-readable version of this site's content (OKF v0.2).
+- [Home: SEO services in Minneapolis](https://seo4web.pro/): Search engine optimization Minneapolis services help local companies gain visibility, attract qualified traffic, and grow with a proven SEO agency.
+- [About us](https://seo4web.pro/about/): A Minnesota team that learned SEO growing its own business 12 years ago. Today our web designers and SaaS developers help businesses nationwide grow.
+- [Contact and free callback](https://seo4web.pro/contact/): Request a free callback or call (612) 230-0815 to talk about website design, SEO or lead generation for your business. Minneapolis office, clients nationwide.
 
-## About
+## Services
 
-- [About us](https://seo4web.pro/about/): Started 12 years ago by business owners who learned SEO to grow their own business; today a Minnesota team of web designers and SaaS developers serving clients nationwide.
+- [Website Design](https://seo4web.pro/minneapolis-web-design-companies/): Minneapolis web design companies create custom websites that attract customers. Partner with skilled designers for strategic SEO and lasting growth.
+- [Web Development](https://seo4web.pro/web-developers-minneapolis/): Web developers Minneapolis businesses trust create high-performing website solutions with strategic development, responsive design, and SEO expertise.
+- [WordPress Design](https://seo4web.pro/wordpress-design-minneapolis/): WordPress design in Minneapolis creates a fast, polished website built for your brand, customers, and search visibility. Request a custom quote today.
+- [Design Agency Services](https://seo4web.pro/design-agency-minneapolis/): Our design agency in Minneapolis creates high-performing websites with strategic SEO, helping ambitious companies attract traffic, leads, and sales.
+- [Graphic Design](https://seo4web.pro/graphic-design-firm-minneapolis/): Our graphic design firm in Minneapolis creates logos, visual identities and marketing graphics, with the process, typical costs and timelines explained.
+- [SEO Consulting](https://seo4web.pro/minneapolis-seo-consultant/): A Minneapolis SEO consultant delivering strategic website optimization, stronger rankings, and qualified traffic to help your business grow online.
+- [Local SEO](https://seo4web.pro/local-seo-minneapolis/): Local SEO Minneapolis services improve search visibility, attract nearby customers, and generate qualified leads with tailored strategies for lasting growth.
+- [Digital Marketing](https://seo4web.pro/digital-marketing-minneapolis-mn/): Digital marketing services for Minneapolis, MN businesses: what is included, how the process works, typical monthly costs and how to choose an agency.
+- [Marketing Services](https://seo4web.pro/marketing-minneapolis/): Marketing strategy for Minneapolis businesses: what the plan should cover, how it is managed, and how each activity is measured against business results.
+- [Online Marketing](https://seo4web.pro/online-marketing-minneapolis/): Online marketing for Minneapolis businesses that coordinates search, content and paid media, with reporting that shows what drives inquiries.
+- [Full-Service Marketing Firm](https://seo4web.pro/minneapolis-marketing-firms/): A full-service Minneapolis marketing firm that coordinates strategy, search, content and campaigns, plus how to compare firms and proposals.
+- [PPC Management](https://seo4web.pro/minneapolis-ppc-management/): Minneapolis PPC management that reaches qualified prospects, cuts wasted spend and improves ROI, with budget control and reliable conversion data.
+- [Social Media Marketing](https://seo4web.pro/social-media-marketing-minneapolis/): Social media marketing Minneapolis businesses trust to build visibility, engage customers, and drive measurable growth with tailored campaigns.
+- [Advertising](https://seo4web.pro/advertising-companies-minneapolis/): Advertising for Minneapolis businesses that aligns campaign strategy, creative and measurement, plus the questions to ask before you hire an ad agency.
+- [Creative Agency Services](https://seo4web.pro/creative-agencies-minneapolis/): Creative agency work for Minneapolis businesses: brand, campaign and content production scoped around clear goals, from brief to launch.
+- [Branding](https://seo4web.pro/branding-agency-minneapolis/): Our Minneapolis branding agency builds brand positioning, identity systems and guidelines, and helps you choose between a refresh and a full rebrand.
 
-## Lead generation for home service contractors
+## Lead generation programs
 
-- [Contractor Lead Generation](https://seo4web.pro/contractor-lead-generation/): Websites, local search, ads and automated follow-up that turn searches into booked jobs for home service contractors.
-- [Landscaping Lead Generation](https://seo4web.pro/landscaping-lead-generation/): Design-build, hardscape and maintenance leads for landscapers, timed to the season and filtered by job size.
-- [Irrigation and Sprinkler Lead Generation](https://seo4web.pro/irrigation-lead-generation/): Installs, repairs, spring startups and fall winterization leads, plus reminders that turn customers into yearly service.
-- [Snow Removal Lead Generation](https://seo4web.pro/snow-removal-lead-generation/): Seasonal plowing contracts sold before the first storm, and storm-day calls captured when competitors are full.
-- [Concrete Contractor Lead Generation](https://seo4web.pro/concrete-contractor-lead-generation/): Driveway, patio, foundation and decorative concrete leads qualified by project size and timeline.
-- [Towing Company Lead Generation](https://seo4web.pro/towing-lead-generation/): Phone-first visibility for urgent towing searches and a system that makes sure no emergency call is missed.
+- [Contractor Lead Generation](https://seo4web.pro/contractor-lead-generation/): Lead generation for landscapers, irrigation, snow removal, concrete and towing companies: websites, local SEO, ads and automated follow-up that books jobs.
+- [Landscaping Lead Generation](https://seo4web.pro/landscaping-lead-generation/): Landscaping lead generation for the jobs you want: design-build, hardscape and maintenance leads from search, maps and ads, followed up automatically.
+- [Irrigation and Sprinkler Lead Generation](https://seo4web.pro/irrigation-lead-generation/): Lead generation for irrigation and sprinkler companies: installs, repairs, startups and winterizations from search and maps, plus automated reminders.
+- [Snow Removal Lead Generation](https://seo4web.pro/snow-removal-lead-generation/): Snow removal lead generation: residential and commercial plowing contracts signed before winter, plus storm-day calls captured automatically.
+- [Concrete Contractor Lead Generation](https://seo4web.pro/concrete-contractor-lead-generation/): Concrete contractor lead generation: driveway, patio, foundation and decorative leads from search and maps, qualified by project size before you quote.
+- [Towing Company Lead Generation](https://seo4web.pro/towing-lead-generation/): Towing lead generation: show up first for urgent tow truck searches, answer every call with missed-call text back, and track which calls become paid tows.
+
+## Optional
+
+- [Privacy Policy](https://seo4web.pro/privacy-policy/): How Website Design & SEO Solutions handles information you share when you visit this website, call or email us.
+- [Terms of Use](https://seo4web.pro/terms-of-use/): The terms that apply when you use the Website Design & SEO Solutions website in Minneapolis, Minnesota.
+- [XML sitemap](https://seo4web.pro/sitemap.xml): Every indexable page with its last-modified date.
+- [Open Knowledge Format bundle](https://seo4web.pro/okf/index.md): Markdown copies of the service pages (OKF v0.2).

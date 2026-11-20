@@ -46,3 +46,17 @@ viewport, JSON-LD validity, broken links, missing assets, orphan pages, sitemap 
 Cloudflare e-mail obfuscation and the share of each page's text that is unique to it.
 
 `build.py` holds the navigation, the contextual-link phrase map (`LINK_PHRASES`) and the structured-data settings (phone, address, hours).
+
+## AI-agent readiness
+
+`tools/agent_ready.py` (run by `build.py` after `seo_fix.py`; safe to re-run) generates `llms.txt`,
+`/.well-known/ard.json` (ARD v0.91 manifest, also linked from every page and from `robots.txt` as `Agentmap:`) and
+`/site-data.json` (business facts and the service list), and adds the credit banner comment and footer links.
+`site.js` registers three WebMCP tools when the browser offers `document.modelContext`: `search_services`,
+`get_business_info` (both read-only) and `request_quote`, which only opens the callback form on `/contact/#form`.
+
+```bash
+python3 -I tools/agent_ready.py public
+git clone https://github.com/ards-project/ard-spec /tmp/ard-spec
+python3 /tmp/ard-spec/conformance/bin/conformance-test manifest public/.well-known/ard.json
+```

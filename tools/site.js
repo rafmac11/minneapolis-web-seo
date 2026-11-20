@@ -58,3 +58,103 @@
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
   els.forEach(function (el) { io.observe(el); });
 })();
+
+// WebMCP tools for in-browser AI agents (https://webmachinelearning.github.io/webmcp/).
+// Read-only lookups plus request_quote, which only opens the callback form; it never submits anything.
+(function () {
+  var mc = document.modelContext || navigator.modelContext;
+  if (!mc || typeof mc.registerTool !== 'function') return;
+  var dataUrl = '/site-data.json';
+  var cache = null;
+  function load() {
+    if (!cache) cache = fetch(dataUrl, { credentials: 'same-origin' }).then(function (r) {
+      if (!r.ok) throw new Error('Could not load ' + dataUrl);
+      return r.json();
+    }).catch(function (e) { cache = null; throw e; });
+    return cache;
+  }
+  function norm(s) { return String(s || '').toLowerCase(); }
+  function register(tool) {
+    try {
+      var p = mc.registerTool(tool);
+      if (p && typeof p.catch === 'function') p.catch(function () {});
+    } catch (e) { /* tool unavailable in this browser: skip */ }
+  }
+
+  register({
+    name: 'search_services',
+    description: 'Search the services offered by Website Design & SEO Solutions (Minneapolis, MN): website design, SEO, marketing, creative and contractor lead generation. Returns matching services with their page URL and a short description.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Keywords to match, for example "wordpress", "google ads" or "snow removal". Leave empty to list everything.' },
+        category: { type: 'string', enum: ['Web Design', 'SEO', 'Marketing', 'Lead Generation', 'Creative'], description: 'Limit results to one service category.' },
+        limit: { type: 'integer', minimum: 1, maximum: 25, description: 'Maximum number of results (default 10).' }
+      }
+    },
+    annotations: { readOnlyHint: true },
+    execute: function (input) {
+      input = input || {};
+      return load().then(function (d) {
+        var words = norm(input.query).split(/\s+/).filter(Boolean);
+        var cat = norm(input.category);
+        var out = d.services.filter(function (s) {
+          if (cat && norm(s.category) !== cat) return false;
+          var hay = norm([s.name, s.category, s.title, s.description, s.keywords].join(' '));
+          return words.every(function (w) { return hay.indexOf(w) !== -1; });
+        }).slice(0, Math.max(1, Math.min(25, input.limit || 10))).map(function (s) {
+          return { name: s.name, category: s.category, url: s.url, description: s.description };
+        });
+        return { count: out.length, services: out };
+      });
+    }
+  });
+
+  register({
+    name: 'get_business_info',
+    description: 'Get contact details, office address, opening hours, service areas, the list of services and the pricing policy of Website Design & SEO Solutions.',
+    inputSchema: { type: 'object', properties: {} },
+    annotations: { readOnlyHint: true },
+    execute: function () {
+      return load().then(function (d) {
+        var b = JSON.parse(JSON.stringify(d.business));
+        b.services = d.services.map(function (s) { return { name: s.name, category: s.category, url: s.url }; });
+        return b;
+      });
+    }
+  });
+
+  register({
+    name: 'request_quote',
+    description: 'Open the free-callback request form so the visitor can fill it in and send it themselves. This tool does not submit anything. Optionally pass the service the visitor is interested in.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        service: { type: 'string', description: 'Optional service name or keyword, for example "local SEO".' }
+      }
+    },
+    annotations: { readOnlyHint: false },
+    execute: function (input) {
+      input = input || {};
+      return load().catch(function () { return { services: [] }; }).then(function (d) {
+        var q = norm(input.service), match = null;
+        if (q) d.services.some(function (s) {
+          if (norm(s.name + ' ' + s.title + ' ' + s.keywords).indexOf(q) !== -1) { match = s; return true; }
+          return false;
+        });
+        var form = document.getElementById('form');
+        if (form && /^\/contact\/?$/.test(location.pathname)) {
+          form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          var field = form.querySelector('input, select, textarea, iframe');
+          if (field) { try { field.focus({ preventScroll: true }); } catch (e) {} }
+          return { opened: true, url: location.origin + '/contact/#form', service: match ? match.name : (input.service || null),
+                   note: 'The callback form is open. The visitor fills it in and sends it; nothing was submitted.' };
+        }
+        var url = '/contact/' + (match ? '?service=' + encodeURIComponent(match.slug) : '') + '#form';
+        setTimeout(function () { location.href = url; }, 60);
+        return { opened: true, url: location.origin + url, service: match ? match.name : (input.service || null),
+                 note: 'Opening the contact page with the callback form. The visitor fills it in and sends it; nothing was submitted.' };
+      });
+    }
+  });
+})();
