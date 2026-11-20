@@ -29,4 +29,20 @@ python3 -I build.py /path/to/original-export ../public
 python3 -I audit.py ../public   # checks titles, descriptions, canonicals, schema, links and images
 ```
 
+## SEO fixes and audit
+
+The original export is not in this repository, so `public/` is the source of truth. SEO changes are data in
+`tools/seo_overrides.py` (titles, descriptions, the "What this page covers" bands, decorative image alt text) and are
+applied by `tools/seo_fix.py`, which is safe to re-run and which `build.py` also runs after a rebuild:
+
+```bash
+python3 -I tools/seo_fix.py public      # apply tools/seo_overrides.py to the site
+python3 -I tools/site_audit.py public   # full audit; exits 1 if any error is found
+```
+
+`site_audit.py` measures titles (≤580px, Arial 20px) and descriptions (≤920px, Arial 13px) in pixels and checks clean
+Cloudflare Pages URLs in canonicals, og:url, JSON-LD, the sitemap, internal links and redirects, plus H1s, lang,
+viewport, JSON-LD validity, broken links, missing assets, orphan pages, sitemap coverage, image alt text and sizes,
+Cloudflare e-mail obfuscation and the share of each page's text that is unique to it.
+
 `build.py` holds the navigation, the contextual-link phrase map (`LINK_PHRASES`) and the structured-data settings (phone, address, hours).

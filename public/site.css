@@ -405,3 +405,13 @@ p{margin:0 0 1.1em}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 @media print{.utility,.site-header,.band,.final,.site-footer,.related{display:none}}
+
+/* "What this page covers" band (seo_fix.py): tells overlapping service pages apart */
+.scope{padding:3rem 0 2.25rem;border-bottom:1px solid var(--rule)}
+.scope-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:1.25rem 3rem;align-items:start}
+.scope-k{font:650 .78rem/1.2 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--orange-ink);margin:0 0 .5rem}
+.scope-this p:last-child{font:550 1.2rem/1.45 var(--display);color:var(--navy);margin:0}
+.scope-more ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.55rem 1.75rem;font-size:.95rem;line-height:1.4}
+.scope-more a{font:600 .98rem/1.3 var(--display)}
+.scope-more span{display:block;color:var(--steel)}
+@media (max-width:900px){.scope-grid{grid-template-columns:1fr}}
