@@ -1052,6 +1052,9 @@ def main():
 """)
     open(os.path.join(OUT, "_redirects"), "w").write(
         "/home / 301\n/services / 301\n")
+    # SEO overrides (titles/descriptions, scope bands, e-mail obfuscation guard, schema tweaks)
+    import subprocess
+    subprocess.run([sys.executable, "-I", os.path.join(here, "seo_fix.py"), OUT], check=True)
     # report
     print("Inbound links per service page (contextual + related block):")
     for s in SERVICES:
