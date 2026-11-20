@@ -8,7 +8,7 @@ Generates, from the site's own pages and structured data:
   /llms.txt                  llmstxt.org summary
   /.well-known/ard.json      Agentic Resource Discovery manifest (ARD v0.91)
 and patches every page with the credit banner comment, <link rel="ard">, the footer
-"Become a Partner" / "Website design by" links, robots.txt Agentmap, and the site.js /
+"Website design by" credit link, robots.txt Agentmap, and the site.js /
 site.css cache-busting versions. Running it twice changes nothing. build.py runs it last.
 """
 import glob, hashlib, html, json, os, re, shutil, sys
@@ -20,7 +20,6 @@ ORIGIN = "https://seo4web.pro"
 DOMAIN = "seo4web.pro"
 SHORT = "SEO4WEB"
 ARD_URL = f"{ORIGIN}/.well-known/ard.json"
-PARTNER = ("Become a Partner", "https://officeequipmentleads.com/")
 CREDIT = ("webleadsnow.com", "https://webleadsnow.com/")
 TOOLS = ["search_services", "get_business_info", "request_quote"]
 # Pricing as the site states it (contact page "A clear plan and price", "Free consultation, no obligation")
@@ -158,10 +157,6 @@ def patch_page(doc, ban, js_v, css_v):
     doc = doc.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + ban, 1)
     if 'rel="ard"' not in doc:
         doc = doc.replace("</head>", f'<link rel="ard" href="{ARD_URL}">\n</head>', 1)
-    # footer company links: Become a Partner
-    if PARTNER[1] not in doc:
-        doc = doc.replace('<a href="/terms-of-use/">Terms of Use</a></p>',
-                          f'<a href="/terms-of-use/">Terms of Use</a><a href="{PARTNER[1]}" target="_blank" rel="noopener">{PARTNER[0]}</a></p>', 1)
     # footer bottom bar: design credit (underlined: link-in-text-block)
     if CREDIT[1] not in doc:
         doc = re.sub(r"(<div class=\"wrap footer-base\">\s*<p>© [^<]*)</p>",
